@@ -18,7 +18,7 @@ const filtre = {
   tekst: '',
   stevnetypeId: '',
   kastemetodeId: '',
-  arrangorklubId: '',
+  klubbId: '',
   kategoriId: '',
 }
 
@@ -121,7 +121,7 @@ function lastNedExcel(filtrert) {
 
 function arOptions() {
   const gjeldende = new Date().getFullYear()
-  const fra = 2018
+  const fra = 1983
   let html = ''
   for (let ar = gjeldende + 1; ar >= fra; ar--) {
     html += `<option value="${ar}" ${ar === filtre.ar ? 'selected' : ''}>${ar}</option>`
