@@ -41,17 +41,16 @@ SUPABASE_CONN = (
     "port=6543 "
     "dbname=postgres "
     "user=postgres.urtvpewjlevhlevtnvkf "
-    f"password={os.environ['SUPABASEDBPW']} "
-    "sslmode=require"
+    f"password={os.environ['SUPABASEDBPW']}"
 )
 
 # ============================================================
-# MANUELL MAPPING: StevneFor -> Kategori
+# MANUELL MAPPING: StevneFor -> kategori
 # Sjekk Id-ane dine med: SELECT Id, StevneForNavn FROM StevneFor
 # ============================================================
 
 STEVNEFOR_MAP = {
-    # StevneForId: ErLagbasert
+    # StevneForId: erlagbasert
     1: False,  # Singel
     2: True,   # Par
     3: True,   # Mix
@@ -105,15 +104,6 @@ def migrate_table(ms_cur, pg_cur, label, sql_select, pg_table, columns, transfor
     return count
 
 
-def reset_sequence(pg_cur, table, col="id"):
-    pg_cur.execute(f"""
-        SELECT setval(
-            pg_get_serial_sequence('{table}', '{col}'),
-            COALESCE((SELECT MAX({col}) FROM {table}), 1)
-        )
-    """)
-
-
 # ============================================================
 # MIGRERINGSLOGIKK
 # ============================================================
@@ -125,52 +115,52 @@ def migrer(ms, pg):
     pg_cur.execute("SET session_replication_role = 'replica';")
 
     print("\nTømmer eksisterande data...")
-    for t in ["Resultat", "Stevne", "Kaster",
-              "NorgescupPoeng", "Kategori", "Kastemetode",
-              "StevneType", "Gruppe", "Klasse", "Klubb", "Kjonn"]:
-        pg_cur.execute(f'TRUNCATE TABLE "{t}" RESTART IDENTITY CASCADE;')
+    for t in ["resultat", "stevne", "kaster",
+              "norgescuppoeng", "kategori", "kastemetode",
+              "stevnetype", "gruppe", "klasse", "klubb", "kjonn"]:
+        pg_cur.execute(f"TRUNCATE TABLE {t} RESTART IDENTITY CASCADE;")
     pg.commit()
     print("  OK")
 
     # ─────────────────────────────────────────────────────────────────────
-    # 1. Kjonn  (Gender -> Kjonn)
+    # 1. kjonn  (Gender -> kjonn)
     #    Gammal: Id, Kjonn (="Mann"/"Kvinne"), Alias (="M"/"K")
-    #    Ny:     Id, Navn, Kortform
+    #    Ny:     id, navn, kortform
     # ─────────────────────────────────────────────────────────────────────
     migrate_table(
         ms_cur, pg_cur,
-        label      = "Kjonn (Gender)",
+        label      = "kjonn (Gender)",
         sql_select = "SELECT Id, Kjonn, Alias FROM Gender",
-        pg_table   = '"Kjonn"',
-        columns    = ["Id", "Navn", "Kortform"],
+        pg_table   = "kjonn",
+        columns    = ["id", "navn", "kortform"],
         transform  = lambda r: (r[0], r[1], r[2])
     )
 
     # ─────────────────────────────────────────────────────────────────────
-    # 2. Gruppe
+    # 2. gruppe
     #    Gammal: Id, GruppeNavn, IsActive
-    #    Ny:     Id, Navn, ErAktiv
+    #    Ny:     id, navn, eraktiv
     # ─────────────────────────────────────────────────────────────────────
     migrate_table(
         ms_cur, pg_cur,
-        label      = "Gruppe",
+        label      = "gruppe",
         sql_select = "SELECT Id, GruppeNavn, IsActive FROM Gruppe",
-        pg_table   = '"Gruppe"',
-        columns    = ["Id", "Navn", "ErAktiv"],
+        pg_table   = "gruppe",
+        columns    = ["id", "navn", "eraktiv"],
         transform  = lambda r: (r[0], r[1], bool(r[2]))
     )
 
     # ─────────────────────────────────────────────────────────────────────
-    # 3. Kastemetode
+    # 3. kastemetode
     #    Gammal: Id, KasteMetodeNavn, Beskrivelse, IsActive, IsNorgesranking
-    #    Ny:     Id, Navn, Beskrivelse, ErAktiv, ErNorgesranking
+    #    Ny:     id, navn, beskrivelse, eraktiv, ernorgesranking
     # ─────────────────────────────────────────────────────────────────────
     migrate_table(
         ms_cur, pg_cur,
-        label      = "Kastemetode",
+        label      = "kastemetode",
         sql_select = "SELECT Id, KasteMetodeNavn, Beskrivelse, IsActive, IsNorgesranking FROM Kastemetode",
-        pg_table   = '"Kastemetode"',
-        columns    = ["Id", "Navn", "Beskrivelse", "ErAktiv", "ErNorgesranking"],
+        pg_table   = "kastemetode",
+        columns    = ["id", "navn", "beskrivelse", "eraktiv", "ernorgesranking"],
         transform  = lambda r: (
             r[0], r[1], r[2],
             bool(r[3]) if r[3] is not None else True,
@@ -179,16 +169,16 @@ def migrer(ms, pg):
     )
 
     # ─────────────────────────────────────────────────────────────────────
-    # 4. Klasse
+    # 4. klasse
     #    Gammal: Id, KlasseNavn, IsActive
-    #    Ny:     Id, Navn, ErAktiv
+    #    Ny:     id, navn, eraktiv
     # ─────────────────────────────────────────────────────────────────────
     migrate_table(
         ms_cur, pg_cur,
-        label      = "Klasse",
+        label      = "klasse",
         sql_select = "SELECT Id, KlasseNavn, IsActive FROM Klasse",
-        pg_table   = '"Klasse"',
-        columns    = ["Id", "Navn", "ErAktiv"],
+        pg_table   = "klasse",
+        columns    = ["id", "navn", "eraktiv"],
         transform  = lambda r: (
             r[0], r[1],
             bool(r[2]) if r[2] is not None else True
@@ -196,17 +186,17 @@ def migrer(ms, pg):
     )
 
     # ─────────────────────────────────────────────────────────────────────
-    # 5. Kategori  (StevneFor -> Kategori)
+    # 5. kategori  (StevneFor -> kategori)
     #    Gammal: Id, StevneForNavn
-    #    Ny:     Id, Navn, ErLagbasert
+    #    Ny:     id, navn, erlagbasert
     #    Juster STEVNEFOR_MAP øvst om Id-ane ikkje stemmer
     # ─────────────────────────────────────────────────────────────────────
     migrate_table(
         ms_cur, pg_cur,
-        label      = "Kategori (StevneFor)",
+        label      = "kategori (StevneFor)",
         sql_select = "SELECT Id, StevneForNavn FROM StevneFor",
-        pg_table   = '"Kategori"',
-        columns    = ["Id", "Navn", "ErLagbasert"],
+        pg_table   = "kategori",
+        columns    = ["id", "navn", "erlagbasert"],
         transform  = lambda r: (
             r[0],
             r[1],
@@ -215,16 +205,16 @@ def migrer(ms, pg):
     )
 
     # ─────────────────────────────────────────────────────────────────────
-    # 6. StevneType
+    # 6. stevnetype
     #    Gammal: Id, StevneTypeNavn, IsActive
-    #    Ny:     Id, Navn, ErAktiv, Beskrivelse
+    #    Ny:     id, navn, eraktiv, beskrivelse
     # ─────────────────────────────────────────────────────────────────────
     migrate_table(
         ms_cur, pg_cur,
-        label      = "StevneType",
+        label      = "stevnetype",
         sql_select = "SELECT Id, StevneTypeNavn, IsActive FROM StevneType",
-        pg_table   = '"StevneType"',
-        columns    = ["Id", "Navn", "ErAktiv", "Beskrivelse"],
+        pg_table   = "stevnetype",
+        columns    = ["id", "navn", "eraktiv", "beskrivelse"],
         transform  = lambda r: (
             r[0], r[1],
             bool(r[2]) if r[2] is not None else True,
@@ -233,16 +223,16 @@ def migrer(ms, pg):
     )
 
     # ─────────────────────────────────────────────────────────────────────
-    # 7. Klubb
+    # 7. klubb
     #    Gammal: Id, KlubbNavn, IsActive
-    #    Ny:     Id, KlubbNavn, KlubbKortNavn, ErAktiv
+    #    Ny:     id, klubbnavn, klubbkortnavn, eraktiv
     # ─────────────────────────────────────────────────────────────────────
     migrate_table(
         ms_cur, pg_cur,
-        label      = "Klubb",
+        label      = "klubb",
         sql_select = "SELECT Id, KlubbNavn, IsActive FROM Klubb",
-        pg_table   = '"Klubb"',
-        columns    = ["Id", "KlubbNavn", "KlubbKortNavn", "ErAktiv"],
+        pg_table   = "klubb",
+        columns    = ["id", "klubbnavn", "klubbkortnavn", "eraktiv"],
         transform  = lambda r: (
             r[0],
             r[1],
@@ -252,46 +242,46 @@ def migrer(ms, pg):
     )
 
     # ─────────────────────────────────────────────────────────────────────
-    # 8. NorgescupPoeng
+    # 8. norgescuppoeng
     #    Gammal: to tabellar – NorgescupenPoeng (t.o.m. 2016)
     #                        – NorgescupenPoeng2017 (f.o.m. 2017)
-    #    Ny: slått saman med GjelderFraAar / GjelderTilAar
+    #    Ny: slått saman med gjelderfraaar / gjeldertilaar
     # ─────────────────────────────────────────────────────────────────────
     migrate_table(
         ms_cur, pg_cur,
-        label      = "NorgescupPoeng (t.o.m. 2016)",
+        label      = "norgescuppoeng (t.o.m. 2016)",
         sql_select = "SELECT Plassering, PoengNC, PoengDNC FROM NorgescupenPoeng ORDER BY Plassering",
-        pg_table   = '"NorgescupPoeng"',
-        columns    = ["Plassering", "PoengNC", "PoengDNC", "GjelderFraAar", "GjelderTilAar"],
+        pg_table   = "norgescuppoeng",
+        columns    = ["plassering", "poengnc", "poengdnc", "gjelderfraaar", "gjeldertilaar"],
         transform  = lambda r: (r[0], r[1], r[2], 1900, 2016)
     )
     migrate_table(
         ms_cur, pg_cur,
-        label      = "NorgescupPoeng (f.o.m. 2017)",
+        label      = "norgescuppoeng (f.o.m. 2017)",
         sql_select = "SELECT Plassering, PoengNC, PoengDNC FROM NorgescupenPoeng2017 ORDER BY Plassering",
-        pg_table   = '"NorgescupPoeng"',
-        columns    = ["Plassering", "PoengNC", "PoengDNC", "GjelderFraAar", "GjelderTilAar"],
+        pg_table   = "norgescuppoeng",
+        columns    = ["plassering", "poengnc", "poengdnc", "gjelderfraaar", "gjeldertilaar"],
         transform  = lambda r: (r[0], r[1], r[2], 2017, None)
     )
 
     # ─────────────────────────────────────────────────────────────────────
-    # 9. Kaster
+    # 9. kaster
     #    Gammal: Id, Medlemsnummer, Fornavn, Etternavn, Telefon, Epost,
     #            GenderId, KlubbId, KlasseId, IsActive
-    #    Ny:     Id, Medlemsnummer, Fornavn, Etternavn, Telefon, Epost,
-    #            KjonnId, KlubbId, KlasseId, ErAktiv
+    #    Ny:     id, medlemsnummer, fornavn, etternavn, telefon, epost,
+    #            kjonnid, klubbid, klasseid, eraktiv
     # ─────────────────────────────────────────────────────────────────────
     migrate_table(
         ms_cur, pg_cur,
-        label      = "Kaster",
+        label      = "kaster",
         sql_select = """
             SELECT Id, Medlemsnummer, Fornavn, Etternavn,
                    Telefon, Epost, GenderId, KlubbId, KlasseId, IsActive
             FROM Kaster
         """,
-        pg_table   = '"Kaster"',
-        columns    = ["Id", "Medlemsnummer", "Fornavn", "Etternavn",
-                      "Telefon", "Epost", "KjonnId", "KlubbId", "KlasseId", "ErAktiv"],
+        pg_table   = "kaster",
+        columns    = ["id", "medlemsnummer", "fornavn", "etternavn",
+                      "telefon", "epost", "kjonnid", "klubbid", "klasseid", "eraktiv"],
         transform  = lambda r: (
             r[0], r[1], r[2], r[3],
             r[4], r[5], r[6], r[7], r[8],
@@ -300,17 +290,17 @@ def migrer(ms, pg):
     )
 
     # ─────────────────────────────────────────────────────────────────────
-    # 10. Stevne
+    # 10. stevne
     #     Gammal: Id, StevneNavn, StevneSted, StevneDato, KlubbId,
     #             StevneTypeId, InnledendeKastemetodeId, AvsluttendeKastemetodeId,
     #             StevneForId, KasterId, Juryleder,
     #             IsNM, IsNorgesranking, IsCompleted, IsExcludedFromRecords
-    #     Ny:     Id, StevneNavn, StevneSted, StevneDato, KlubbId,
-    #             StevneTypeId, InnledendeKastemetodeId, AvsluttendeKastemetodeId,
-    #             KategoriId, KontaktKasterId, Juryleder,
-    #             ErNM, ErNorgesranking, ErFullfort, ErEkskludertFraRekorder
+    #     Ny:     id, stevnenavn, stevnested, stevnedato, klubbid,
+    #             stevnetypeid, innledendekastemetodeid, avsluttendekastemetodeid,
+    #             kategoriid, kontaktkasterid, juryleder,
+    #             ernm, ernorgesranking, erfulfort, erekskludertfrarekorder
     # ─────────────────────────────────────────────────────────────────────
-    print("\n-> Migrerer Stevne...")
+    print("\n-> Migrerer stevne...")
     ms_cur.execute("""
         SELECT Id, StevneNavn, StevneSted, StevneDato, KlubbId,
                StevneTypeId, InnledendeKastemetodeId, AvsluttendeKastemetodeId,
@@ -323,53 +313,52 @@ def migrer(ms, pg):
     for r in stevne_rows:
         dato = r[3].date() if r[3] else None
         stevne_data.append((
-            r[0],   # Id
-            r[1],   # StevneNavn
-            r[2],   # StevneSted
-            dato,   # StevneDato
-            r[4],   # KlubbId
-            r[5],   # StevneTypeId
-            r[6],   # InnledendeKastemetodeId
-            r[7],   # AvsluttendeKastemetodeId
-            r[8],   # KategoriId  (StevneForId)
-            r[9],   # KontaktKasterId  (KasterId)
-            r[10],  # Juryleder
-            bool(r[11]) if r[11] is not None else False,  # ErNM
-            bool(r[12]),                                   # ErNorgesranking
-            bool(r[13]),                                   # ErFullfort
-            bool(r[14]) if r[14] is not None else False,  # ErEkskludertFraRekorder
+            r[0],   # id
+            r[1],   # stevnenavn
+            r[2],   # stevnested
+            dato,   # stevnedato
+            r[4],   # klubbid
+            r[5],   # stevnetypeid
+            r[6],   # innledendekastemetodeid
+            r[7],   # avsluttendekastemetodeid
+            r[8],   # kategoriid  (StevneForId)
+            r[9],   # kontaktkasterid  (KasterId)
+            r[10],  # juryleder
+            bool(r[11]) if r[11] is not None else False,  # ernm
+            bool(r[12]),                                   # ernorgesranking
+            bool(r[13]),                                   # erfulfort
+            bool(r[14]) if r[14] is not None else False,  # erekskludertfrarekorder
         ))
 
     psycopg2.extras.execute_batch(pg_cur, """
-        INSERT INTO "Stevne" (
-            "Id", "StevneNavn", "StevneSted", "StevneDato", "KlubbId",
-            "StevneTypeId", "InnledendeKastemetodeId", "AvsluttendeKastemetodeId",
-            "KategoriId", "KontaktKasterId", "Juryleder",
-            "ErNM", "ErNorgesranking", "ErFullfort", "ErEkskludertFraRekorder"
+        INSERT INTO stevne (
+            id, stevnenavn, stevnested, stevnedato, klubbid,
+            stevnetypeid, innledendekastemetodeid, avsluttendekastemetodeid,
+            kategoriid, kontaktkasterid, juryleder,
+            ernm, ernorgesranking, erfullfort, erekskludertfrarekorder
         ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         ON CONFLICT DO NOTHING
     """, stevne_data)
     print(f"  OK {len(stevne_data)} stevner")
 
     # ─────────────────────────────────────────────────────────────────────
-    # 11. Resultat
+    # 11. resultat
     #     Gammal: Id, StevneId, GruppeId, KasterId, KlubbId, KlasseId,
     #             Plassering, IsPremie, PoengNc,
     #             PoengInnledende, PoengScore,
     #             PoengXkast, PoengXkastHel, PoengKonge, PoengGolf, PoengMinimatch,
     #             AntallRingMinimatch, AntallRingKonge, AntallRingHalvmatch, AntallRingHeilmatch
-    #     Ny:     alle i same tabell (ingen split)
     #
     #     Kolonnemapping:
-    #       PoengNc          -> NorgescupPoeng
-    #       PoengInnledende  -> KampPoeng
-    #       PoengScore       -> SkarInnledende
-    #       PoengXkast       -> PoengXHalvmatch
-    #       PoengXkastHel    -> PoengXHeilmatch
-    #       PoengKonge       -> PoengKongelag
-    #       AntallRingKonge  -> AntallRingKongelag
+    #       PoengNc          -> norgescuppoeng
+    #       PoengInnledende  -> kamppoeng
+    #       PoengScore       -> skarinnledende
+    #       PoengXkast       -> poengxhalvmatch
+    #       PoengXkastHel    -> poengxheilmatch
+    #       PoengKonge       -> poengkongelag
+    #       AntallRingKonge  -> antallringkongelag
     # ─────────────────────────────────────────────────────────────────────
-    print("\n-> Migrerer Resultat...")
+    print("\n-> Migrerer resultat...")
     ms_cur.execute("""
         SELECT Id, StevneId, GruppeId, KasterId, KlubbId, KlasseId,
                Plassering, IsPremie, PoengNc,
@@ -391,29 +380,29 @@ def migrer(ms, pg):
             Id, StevneId, GruppeId, KasterId, KlubbId, KlasseId,
             Plassering,
             bool(IsPremie) if IsPremie is not None else None,
-            float(PoengNc) if PoengNc is not None else None,           # NorgescupPoeng
-            float(PoengInnledende) if PoengInnledende is not None else None,  # KampPoeng
-            PoengScore,                                                 # SkarInnledende
+            float(PoengNc) if PoengNc is not None else None,
+            float(PoengInnledende) if PoengInnledende is not None else None,
+            PoengScore,
             PoengMinimatch,
-            PoengXkast,     # PoengXHalvmatch
-            PoengXkastHel,  # PoengXHeilmatch
-            PoengKonge,     # PoengKongelag
+            PoengXkast,
+            PoengXkastHel,
+            PoengKonge,
             PoengGolf,
             AntallRingMinimatch,
             AntallRingHalvmatch,
             AntallRingHeilmatch,
-            AntallRingKonge,  # AntallRingKongelag
+            AntallRingKonge,
         ))
 
     psycopg2.extras.execute_batch(pg_cur, """
-        INSERT INTO "Resultat" (
-            "Id", "StevneId", "GruppeId", "KasterId", "KlubbId", "KlasseId",
-            "Plassering", "ErPremie", "NorgescupPoeng",
-            "KampPoeng", "SkarInnledende",
-            "PoengMinimatch", "PoengXHalvmatch", "PoengXHeilmatch",
-            "PoengKongelag", "PoengGolf",
-            "AntallRingMinimatch", "AntallRingHalvmatch",
-            "AntallRingHeilmatch", "AntallRingKongelag"
+        INSERT INTO resultat (
+            id, stevneid, gruppeid, kasterid, klubbid, klasseid,
+            plassering, erpremie, norgescuppoeng,
+            kamppoeng, skarinnledende,
+            poengminimatch, poengxhalvmatch, poengxheilmatch,
+            poengkongelag, poenggolf,
+            antallringminimatch, antallringhalvmatch,
+            antallringheilmatch, antallringkongelag
         ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         ON CONFLICT DO NOTHING
     """, resultat_data)
@@ -423,16 +412,13 @@ def migrer(ms, pg):
     # Synkroniser SERIAL-sekvensar
     # ─────────────────────────────────────────────────────────────────────
     print("\n-> Synkroniserer sekvensar...")
-    for table, col in [
-        ("Kjonn", "Id"), ("Klubb", "Id"), ("Klasse", "Id"),
-        ("Gruppe", "Id"), ("StevneType", "Id"), ("Kastemetode", "Id"),
-        ("Kategori", "Id"), ("NorgescupPoeng", "Id"),
-        ("Kaster", "Id"), ("Stevne", "Id"), ("Resultat", "Id"),
-    ]:
+    for table in ["kjonn", "klubb", "klasse", "gruppe", "stevnetype",
+                  "kastemetode", "kategori", "norgescuppoeng",
+                  "kaster", "stevne", "resultat"]:
         pg_cur.execute(f"""
             SELECT setval(
-                pg_get_serial_sequence('"{table}"', '{col}'),
-                COALESCE((SELECT MAX("{col}") FROM "{table}"), 1)
+                pg_get_serial_sequence('{table}', 'id'),
+                COALESCE((SELECT MAX(id) FROM {table}), 1)
             )
         """)
         print(f"  OK {table}")
