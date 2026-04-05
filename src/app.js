@@ -1,10 +1,12 @@
 import { render as renderHome } from './pages/home.js'
 import { render as renderResultat } from './pages/resultat.js'
+import { render as renderTerminliste } from './pages/terminliste.js'
 
 const container = document.getElementById('app')
 
 const ruter = [
   { mønster: /^\/resultat\/(\d+)$/, side: renderResultat, params: m => ({ id: m[1] }) },
+  { mønster: /^\/terminliste$/, side: renderTerminliste, params: () => ({}) },
   { mønster: /^\/?$/, side: renderHome, params: () => ({}) },
 ]
 

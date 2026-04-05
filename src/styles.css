@@ -160,6 +160,228 @@ body {
   text-decoration: underline;
 }
 
+/* ── Terminliste ── */
+
+.terminliste {
+  padding-bottom: 40px;
+}
+
+.tl-tittel {
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: bold;
+  margin-bottom: 14px;
+}
+
+/* Filter-rad (desktop) */
+.tl-filter-rad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tl-input {
+  flex: 1 1 140px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.tl-select {
+  flex: 1 1 120px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background: #fff;
+}
+
+/* Mobil-rad (søk + filterknapp) – skjult på desktop */
+.tl-mobil-rad {
+  display: none;
+  gap: 6px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.tl-filter-knapp {
+  padding: 7px 12px;
+  border: 1px solid #1558d6;
+  border-radius: 4px;
+  background: #fff;
+  color: #1558d6;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tl-excel-knapp {
+  padding: 7px 12px;
+  border: 1px solid #1558d6;
+  border-radius: 4px;
+  background: #fff;
+  color: #1558d6;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tl-excel-knapp:hover,
+.tl-filter-knapp:hover {
+  background: #f0f4ff;
+}
+
+.tl-antall {
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+/* Kort (terminliste) */
+.tl-kort {
+  text-align: center;
+}
+
+.tl-navn {
+  font-size: 1.05rem;
+  color: #1a0dab;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.tl-detalj {
+  font-size: 0.83rem;
+  color: #444;
+  margin-bottom: 2px;
+}
+
+.tl-nm-merke {
+  display: inline-block;
+  background: #d4af37;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.tl-innbydelse-lenke {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #1558d6;
+  text-decoration: none;
+}
+
+.tl-innbydelse-lenke:hover {
+  text-decoration: underline;
+}
+
+/* Bunnark (mobil-filtre) */
+.tl-bunnark-bakgrunn {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+}
+
+.tl-bunnark-bakgrunn.aktiv {
+  display: block;
+}
+
+.tl-bunnark {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  z-index: 300;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.tl-bunnark.aktiv {
+  transform: translateY(0);
+}
+
+.tl-bunnark-innhold {
+  padding: 20px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tl-bunnark-tittel {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.tl-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.tl-label .tl-select {
+  flex: unset;
+  width: 100%;
+}
+
+.tl-bunnark-knapper {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tl-tilbakestill-knapp {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.tl-bruk-knapp {
+  flex: 2;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background: #1558d6;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Responsiv: mobilvisning */
+@media (max-width: 600px) {
+  .tl-filter-rad {
+    display: none;
+  }
+
+  .tl-mobil-rad {
+    display: flex;
+  }
+
+  .tl-mobil-rad .tl-input {
+    flex: 1;
+  }
+}
+
 /* ── Laster / feil ── */
 
 .laster,
