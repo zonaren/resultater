@@ -406,13 +406,13 @@ body {
 .res-klassifisering {
   text-align: center;
   font-size: 0.85rem;
-  color: #555;
+  color: #222;
   margin-bottom: 2px;
 }
 
 .res-pdf-lenke {
   display: block;
-  color: #1558d6;
+  color: #31527E;
   font-size: 0.85rem;
   text-decoration: none;
   margin-bottom: 6px;
@@ -433,7 +433,7 @@ body {
 
 /* Gruppe (mobil) */
 .res-gruppe {
-  border: 1px solid #c8d4e8;
+  border: 1px solid #222;
   border-radius: 6px;
   margin-bottom: 16px;
   overflow: hidden;
@@ -444,15 +444,17 @@ body {
   font-size: 0.95rem;
   font-weight: bold;
   padding: 8px 12px;
-  background: #f0f4ff;
-  border-bottom: 1px solid #c8d4e8;
+  background: #31527E;
+  color: #F6F7FB;
+  border-bottom: 1px solid #222;
 }
 
 .res-rad {
   display: flex;
   align-items: center;
   padding: 10px 14px;
-  border-bottom: 1px solid #e8eef8;
+  border-bottom: 1px solid #222;
+  background: #F6F7FB;
   gap: 12px;
 }
 
@@ -463,7 +465,7 @@ body {
 .res-pl {
   font-size: 1rem;
   font-weight: bold;
-  color: #1558d6;
+  color: #31527E;
   min-width: 28px;
 }
 
@@ -475,12 +477,12 @@ body {
 .res-navn {
   font-size: 0.95rem;
   font-weight: bold;
-  color: #1558d6;
+  color: #31527E;
 }
 
 .res-klubb {
   font-size: 0.8rem;
-  color: #555;
+  color: #222;
 }
 
 /* Desktop-infotabell */
@@ -493,22 +495,23 @@ body {
 
 .res-info-tabell td {
   padding: 6px 10px;
-  border: 1px solid #c8d4e8;
+  border: 1px solid #222;
 }
 
 .res-info-label {
-  background: #1558d6;
-  color: #fff;
+  background: #31527E;
+  color: #F6F7FB;
   font-weight: bold;
   white-space: nowrap;
 }
 
 .res-info-verdi {
-  background: #fff;
+  background: #F6F7FB;
+  color: #222;
 }
 
 .res-sted-verdi {
-  background: #e6f0ff;
+  background: #F6F7FB;
 }
 
 /* Desktop-resultattabell */
@@ -523,16 +526,16 @@ body {
 }
 
 .res-thead-gruppe td {
-  background: #1558d6;
-  color: #fff;
+  background: #31527E;
+  color: #F6F7FB;
   font-weight: bold;
   text-align: center;
   padding: 6px 10px;
 }
 
 .res-thead-kolonner th {
-  background: #1558d6;
-  color: #fff;
+  background: #31527E;
+  color: #F6F7FB;
   text-align: left;
   padding: 5px 10px;
   font-size: 0.8rem;
@@ -540,15 +543,17 @@ body {
 }
 
 .res-tabell tbody tr {
-  border-bottom: 1px solid #e0e8f4;
+  border-bottom: 1px solid #222;
+  background: #F6F7FB;
 }
 
 .res-tabell tbody tr:nth-child(even) {
-  background: #f5f8ff;
+  background: #eceef3;
 }
 
 .res-tabell td {
   padding: 5px 10px;
+  color: #222;
 }
 
 .res-td-pl {
@@ -561,7 +566,7 @@ body {
 }
 
 .res-kaster-lenke {
-  color: #1558d6;
+  color: #31527E;
   text-decoration: none;
 }
 
