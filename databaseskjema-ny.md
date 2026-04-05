@@ -145,7 +145,6 @@
 | Navn | string | f.eks. "NM Singel 2026" |
 | Sted | string? | |
 | Dato | date | |
-| SluttDato | date? | For stevner som strekker seg over flere dager |
 | ArrangorKlubbId | int? FK → Klubb | |
 | KategoriId | int FK → Kategori | erstatter StevneForId |
 | StevneTypeId | int? FK → StevneType | |

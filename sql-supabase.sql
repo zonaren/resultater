@@ -31,8 +31,8 @@ CREATE TABLE Kjonn (
 
 CREATE TABLE Klubb (
     Id             SERIAL PRIMARY KEY,
-    KlubbNavn      TEXT NOT NULL,
-    KlubbKortNavn  TEXT NOT NULL DEFAULT '',
+    Navn           TEXT NOT NULL,
+    KortNavn       TEXT NOT NULL DEFAULT '',
     ErAktiv        BOOLEAN NOT NULL DEFAULT TRUE
 );
 
@@ -97,9 +97,9 @@ CREATE TABLE Kaster (
 
 CREATE TABLE Stevne (
     Id                       SERIAL PRIMARY KEY,
-    StevneNavn               TEXT NOT NULL,
-    StevneSted               TEXT,
-    StevneDato               TIMESTAMPTZ,
+    Navn               TEXT NOT NULL,
+    Sted               TEXT,
+    Dato               TIMESTAMPTZ,
     KlubbId                  INT REFERENCES Klubb(Id),          -- Arrangørklubb
     StevneTypeId             INT REFERENCES StevneType(Id),
     InnledendeKastemetodeId  INT REFERENCES Kastemetode(Id),
@@ -124,8 +124,8 @@ CREATE TABLE Resultat (
     ErPremie       BOOLEAN,
     NorgescupPoeng REAL,
     -- Gloppen / Nordhordlandsmetoden
-    KampPoeng      REAL,    -- 2, 1.5, 1 eller 0
-    SkarInnledende INT,
+    PoengInnledende      REAL,    -- 2, 1.5, 1 eller 0
+    ScoreInnledende INT,
     -- X-kast
     PoengMinimatch  INT,
     PoengXHalvmatch INT,
