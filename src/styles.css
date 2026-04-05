@@ -257,6 +257,15 @@ body {
   margin-bottom: 4px;
 }
 
+.tl-navn-lenke {
+  display: block;
+  text-decoration: none;
+}
+
+.tl-navn-lenke:hover {
+  text-decoration: underline;
+}
+
 .tl-detalj {
   font-size: 0.83rem;
   color: #444;

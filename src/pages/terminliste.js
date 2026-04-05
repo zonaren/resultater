@@ -152,7 +152,7 @@ function kortHtml(s) {
 
   return `
     <div class="stevne-kort tl-kort">
-      <p class="tl-navn">${nm}${s.navn}</p>
+      <a class="tl-navn tl-navn-lenke" href="#/resultat/${s.id}">${nm}${s.navn}</a>
       <p class="stevne-dato">${dato}</p>
       ${sted}${arrangør}${type}
       ${innbydelse}${resultat}
