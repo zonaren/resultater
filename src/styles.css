@@ -16,6 +16,12 @@ body {
   padding: 20px 16px;
 }
 
+@media (min-width: 700px) {
+  #app {
+    max-width: 1280px;
+  }
+}
+
 /* ── Header ── */
 
 .topp-header {
@@ -379,6 +385,206 @@ body {
 
   .tl-mobil-rad .tl-input {
     flex: 1;
+  }
+}
+
+/* ── Resultatside ── */
+
+.res-side {
+  padding-bottom: 40px;
+}
+
+/* Mobil-info */
+.res-tittel {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.res-dato-sted,
+.res-klassifisering {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 2px;
+}
+
+.res-pdf-lenke {
+  display: block;
+  color: #1558d6;
+  font-size: 0.85rem;
+  text-decoration: none;
+  margin-bottom: 6px;
+}
+
+.res-pdf-lenke:hover {
+  text-decoration: underline;
+}
+
+.res-antall {
+  font-size: 0.95rem;
+  margin-bottom: 14px;
+}
+
+.res-felles {
+  margin: 12px 0;
+}
+
+/* Gruppe (mobil) */
+.res-gruppe {
+  border: 1px solid #c8d4e8;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.res-gruppe-tittel {
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: bold;
+  padding: 8px 12px;
+  background: #f0f4ff;
+  border-bottom: 1px solid #c8d4e8;
+}
+
+.res-rad {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e8eef8;
+  gap: 12px;
+}
+
+.res-rad:last-child {
+  border-bottom: none;
+}
+
+.res-pl {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #1558d6;
+  min-width: 28px;
+}
+
+.res-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.res-navn {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #1558d6;
+}
+
+.res-klubb {
+  font-size: 0.8rem;
+  color: #555;
+}
+
+/* Desktop-infotabell */
+.res-info-tabell {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 14px;
+  font-size: 0.85rem;
+}
+
+.res-info-tabell td {
+  padding: 6px 10px;
+  border: 1px solid #c8d4e8;
+}
+
+.res-info-label {
+  background: #1558d6;
+  color: #fff;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.res-info-verdi {
+  background: #fff;
+}
+
+.res-sted-verdi {
+  background: #e6f0ff;
+}
+
+/* Desktop-resultattabell */
+.res-tabell-seksjon {
+  margin-bottom: 20px;
+}
+
+.res-tabell {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.res-thead-gruppe td {
+  background: #1558d6;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  padding: 6px 10px;
+}
+
+.res-thead-kolonner th {
+  background: #1558d6;
+  color: #fff;
+  text-align: left;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+}
+
+.res-tabell tbody tr {
+  border-bottom: 1px solid #e0e8f4;
+}
+
+.res-tabell tbody tr:nth-child(even) {
+  background: #f5f8ff;
+}
+
+.res-tabell td {
+  padding: 5px 10px;
+}
+
+.res-td-pl {
+  width: 40px;
+}
+
+.res-td-nc {
+  width: 60px;
+  text-align: right;
+}
+
+.res-kaster-lenke {
+  color: #1558d6;
+  text-decoration: none;
+}
+
+.res-kaster-lenke:hover {
+  text-decoration: underline;
+}
+
+/* Responsiv: vis/skjul blokker */
+.res-mobil-blokk {
+  display: block;
+}
+
+.res-desktop-blokk {
+  display: none;
+}
+
+@media (min-width: 700px) {
+  .res-mobil-blokk {
+    display: none;
+  }
+
+  .res-desktop-blokk {
+    display: block;
   }
 }
 
