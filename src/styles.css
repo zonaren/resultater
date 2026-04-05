@@ -1,14 +1,4 @@
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: Arial, sans-serif;
-  background: #fff;
-  color: #222;
-}
+/* Bootstrap 5 reboot håndterer box-sizing, margin/padding-reset og body-basisstiler */
 
 #app {
   max-width: 500px;
@@ -39,7 +29,6 @@ body {
 .header-tittel {
   font-size: 0.95rem;
   font-weight: bold;
-  color: #222;
 }
 
 .meny-knapp {
@@ -62,7 +51,6 @@ body {
   transition: transform 0.25s, opacity 0.25s;
 }
 
-/* X-animasjon når menyen er åpen */
 .meny-knapp.aktiv span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
 .meny-knapp.aktiv span:nth-child(2) { opacity: 0; }
 .meny-knapp.aktiv span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
@@ -77,9 +65,7 @@ body {
   z-index: 200;
 }
 
-.meny-bakgrunn.aktiv {
-  display: block;
-}
+.meny-bakgrunn.aktiv { display: block; }
 
 .sidepanel {
   position: fixed;
@@ -95,9 +81,7 @@ body {
   overflow-y: auto;
 }
 
-.sidepanel.aktiv {
-  transform: translateX(0);
-}
+.sidepanel.aktiv { transform: translateX(0); }
 
 .meny-liste {
   list-style: none;
@@ -108,16 +92,14 @@ body {
   display: block;
   padding: 12px 20px;
   font-size: 0.95rem;
-  color: #1558d6;
+  color: #31527E;
   text-decoration: none;
 }
 
-.meny-liste li a:hover {
-  background: #f0f4ff;
-}
+.meny-liste li a:hover { background: #F6F7FB; }
 
 .meny-skillelinje {
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid #ddd;
   margin: 8px 0;
 }
 
@@ -151,26 +133,22 @@ body {
 
 .stevne-navn {
   font-size: 1rem;
-  color: #1a0dab;
+  color: #31527E;
   margin-bottom: 6px;
 }
 
 .stevne-lenke {
   display: block;
   font-size: 0.85rem;
-  color: #1558d6;
+  color: #31527E;
   text-decoration: none;
 }
 
-.stevne-lenke:hover {
-  text-decoration: underline;
-}
+.stevne-lenke:hover { text-decoration: underline; }
 
 /* ── Terminliste ── */
 
-.terminliste {
-  padding-bottom: 40px;
-}
+.terminliste { padding-bottom: 40px; }
 
 .tl-tittel {
   text-align: center;
@@ -179,7 +157,6 @@ body {
   margin-bottom: 14px;
 }
 
-/* Filter-rad (desktop) */
 .tl-filter-rad {
   display: flex;
   flex-wrap: wrap;
@@ -204,7 +181,6 @@ body {
   background: #fff;
 }
 
-/* Mobil-rad (søk + filterknapp) – skjult på desktop */
 .tl-mobil-rad {
   display: none;
   gap: 6px;
@@ -212,32 +188,20 @@ body {
   align-items: center;
 }
 
-.tl-filter-knapp {
-  padding: 7px 12px;
-  border: 1px solid #1558d6;
-  border-radius: 4px;
-  background: #fff;
-  color: #1558d6;
-  font-size: 0.85rem;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
+.tl-filter-knapp,
 .tl-excel-knapp {
   padding: 7px 12px;
-  border: 1px solid #1558d6;
+  border: 1px solid #31527E;
   border-radius: 4px;
   background: #fff;
-  color: #1558d6;
+  color: #31527E;
   font-size: 0.85rem;
   cursor: pointer;
   white-space: nowrap;
 }
 
-.tl-excel-knapp:hover,
-.tl-filter-knapp:hover {
-  background: #f0f4ff;
-}
+.tl-filter-knapp:hover,
+.tl-excel-knapp:hover { background: #F6F7FB; }
 
 .tl-antall {
   font-size: 0.8rem;
@@ -245,14 +209,11 @@ body {
   margin-bottom: 10px;
 }
 
-/* Kort (terminliste) */
-.tl-kort {
-  text-align: center;
-}
+.tl-kort { text-align: center; }
 
 .tl-navn {
   font-size: 1.05rem;
-  color: #1a0dab;
+  color: #31527E;
   font-weight: 600;
   margin-bottom: 4px;
 }
@@ -262,9 +223,7 @@ body {
   text-decoration: none;
 }
 
-.tl-navn-lenke:hover {
-  text-decoration: underline;
-}
+.tl-navn-lenke:hover { text-decoration: underline; }
 
 .tl-detalj {
   font-size: 0.83rem;
@@ -288,15 +247,14 @@ body {
   display: block;
   margin-top: 6px;
   font-size: 0.85rem;
-  color: #1558d6;
+  color: #31527E;
   text-decoration: none;
 }
 
-.tl-innbydelse-lenke:hover {
-  text-decoration: underline;
-}
+.tl-innbydelse-lenke:hover { text-decoration: underline; }
 
 /* Bunnark (mobil-filtre) */
+
 .tl-bunnark-bakgrunn {
   display: none;
   position: fixed;
@@ -305,9 +263,7 @@ body {
   z-index: 200;
 }
 
-.tl-bunnark-bakgrunn.aktiv {
-  display: block;
-}
+.tl-bunnark-bakgrunn.aktiv { display: block; }
 
 .tl-bunnark {
   position: fixed;
@@ -324,9 +280,7 @@ body {
   overflow-y: auto;
 }
 
-.tl-bunnark.aktiv {
-  transform: translateY(0);
-}
+.tl-bunnark.aktiv { transform: translateY(0); }
 
 .tl-bunnark-innhold {
   padding: 20px 16px 32px;
@@ -338,7 +292,6 @@ body {
 .tl-bunnark-tittel {
   font-size: 1rem;
   font-weight: bold;
-  margin-bottom: 4px;
 }
 
 .tl-label {
@@ -346,7 +299,6 @@ body {
   flex-direction: column;
   gap: 4px;
   font-size: 0.85rem;
-  color: #444;
 }
 
 .tl-label .tl-select {
@@ -375,35 +327,23 @@ body {
   padding: 10px;
   border: none;
   border-radius: 4px;
-  background: #1558d6;
-  color: #fff;
+  background: #31527E;
+  color: #F6F7FB;
   font-size: 0.9rem;
   font-weight: bold;
   cursor: pointer;
 }
 
-/* Responsiv: mobilvisning */
 @media (max-width: 600px) {
-  .tl-filter-rad {
-    display: none;
-  }
-
-  .tl-mobil-rad {
-    display: flex;
-  }
-
-  .tl-mobil-rad .tl-input {
-    flex: 1;
-  }
+  .tl-filter-rad { display: none; }
+  .tl-mobil-rad { display: flex; }
+  .tl-mobil-rad .tl-input { flex: 1; }
 }
 
 /* ── Resultatside ── */
 
-.res-side {
-  padding-bottom: 40px;
-}
+.res-side { padding-bottom: 40px; }
 
-/* Mobil-info */
 .res-tittel {
   text-align: center;
   font-size: 1.2rem;
@@ -427,20 +367,17 @@ body {
   margin-bottom: 6px;
 }
 
-.res-pdf-lenke:hover {
-  text-decoration: underline;
-}
+.res-pdf-lenke:hover { text-decoration: underline; }
 
 .res-antall {
   font-size: 0.95rem;
   margin-bottom: 14px;
 }
 
-.res-felles {
-  margin: 12px 0;
-}
+.res-felles { margin: 12px 0; }
 
 /* Gruppe (mobil) */
+
 .res-gruppe {
   border: 1px solid #222;
   border-radius: 6px;
@@ -467,9 +404,7 @@ body {
   gap: 12px;
 }
 
-.res-rad:last-child {
-  border-bottom: none;
-}
+.res-rad:last-child { border-bottom: none; }
 
 .res-pl {
   font-size: 1rem;
@@ -495,6 +430,7 @@ body {
 }
 
 /* Desktop-infotabell */
+
 .res-info-tabell {
   width: 100%;
   border-collapse: collapse;
@@ -519,14 +455,9 @@ body {
   color: #222;
 }
 
-.res-sted-verdi {
-  background: #F6F7FB;
-}
-
 /* Desktop-resultattabell */
-.res-tabell-seksjon {
-  margin-bottom: 20px;
-}
+
+.res-tabell-seksjon { margin-bottom: 20px; }
 
 .res-tabell {
   width: 100%;
@@ -556,18 +487,14 @@ body {
   background: #F6F7FB;
 }
 
-.res-tabell tbody tr:nth-child(even) {
-  background: #eceef3;
-}
+.res-tabell tbody tr:nth-child(even) { background: #eceef3; }
 
 .res-tabell td {
   padding: 5px 10px;
   color: #222;
 }
 
-.res-td-pl {
-  width: 40px;
-}
+.res-td-pl { width: 40px; }
 
 .res-td-nc {
   width: 60px;
@@ -579,38 +506,28 @@ body {
   text-decoration: none;
 }
 
-.res-kaster-lenke:hover {
-  text-decoration: underline;
-}
+.res-kaster-lenke:hover { text-decoration: underline; }
 
 /* Responsiv: vis/skjul blokker */
-.res-mobil-blokk {
-  display: block;
-}
 
-.res-desktop-blokk {
-  display: none;
-}
+.res-mobil-blokk { display: block; }
+.res-desktop-blokk { display: none; }
 
 @media (min-width: 700px) {
-  .res-mobil-blokk {
-    display: none;
-  }
-
-  .res-desktop-blokk {
-    display: block;
-  }
+  .res-mobil-blokk { display: none; }
+  .res-desktop-blokk { display: block; }
 }
 
 /* ── Laster / feil ── */
 
-.laster,
-.feil {
+.laster {
   text-align: center;
   color: #666;
   margin-top: 40px;
 }
 
 .feil {
+  text-align: center;
   color: #c00;
+  margin-top: 40px;
 }
