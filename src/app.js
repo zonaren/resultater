@@ -1,0 +1,26 @@
+import { render as renderHome } from './pages/home.js'
+import { render as renderResultat } from './pages/resultat.js'
+
+const container = document.getElementById('app')
+
+const ruter = [
+  { mønster: /^\/resultat\/(\d+)$/, side: renderResultat, params: m => ({ id: m[1] }) },
+  { mønster: /^\/?$/, side: renderHome, params: () => ({}) },
+]
+
+function naviger() {
+  const hash = location.hash.replace(/^#/, '') || '/'
+
+  for (const rute of ruter) {
+    const treff = hash.match(rute.mønster)
+    if (treff) {
+      rute.side(container, rute.params(treff))
+      return
+    }
+  }
+
+  container.innerHTML = '<p style="text-align:center;margin-top:40px;color:#666;">Side ikke funnet.</p>'
+}
+
+window.addEventListener('hashchange', naviger)
+document.addEventListener('DOMContentLoaded', naviger)

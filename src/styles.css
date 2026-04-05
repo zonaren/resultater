@@ -1,0 +1,75 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #fff;
+  color: #222;
+}
+
+#app {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+/* ── Fremsiden ── */
+
+.siste-resultater h1 {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 14px;
+}
+
+.stevne-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stevne-kort {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.stevne-dato {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.stevne-navn {
+  font-size: 1rem;
+  color: #1a0dab;
+  margin-bottom: 6px;
+}
+
+.stevne-lenke {
+  display: block;
+  font-size: 0.85rem;
+  color: #1558d6;
+  text-decoration: none;
+}
+
+.stevne-lenke:hover {
+  text-decoration: underline;
+}
+
+/* ── Laster / feil ── */
+
+.laster,
+.feil {
+  text-align: center;
+  color: #666;
+  margin-top: 40px;
+}
+
+.feil {
+  color: #c00;
+}
