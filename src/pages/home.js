@@ -22,8 +22,8 @@ export async function render(container) {
 
   const { data, error } = await supabase
     .from('stevne')
-    .select('id, stevnenavn, stevnedato')
-    .order('stevnedato', { ascending: false })
+    .select('id, navn, dato')
+    .order('dato', { ascending: false })
     .limit(5)
 
   console.log('Supabase svar:', { data, error })
@@ -38,8 +38,8 @@ export async function render(container) {
 
   const kortHtml = data.map(s => `
     <div class="stevne-kort">
-      <p class="stevne-dato">${formaterDato(s.stevnedato)}</p>
-      <p class="stevne-navn">${s.stevnenavn}</p>
+      <p class="stevne-dato">${formaterDato(s.dato)}</p>
+      <p class="stevne-navn">${s.navn}</p>
       <a class="stevne-lenke" href="#/resultat/${s.id}">Vis resultat</a>
     </div>
   `).join('')
