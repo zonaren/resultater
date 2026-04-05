@@ -33,7 +33,8 @@ CREATE TABLE Klubb (
     Id             SERIAL PRIMARY KEY,
     Navn           TEXT NOT NULL,
     KortNavn       TEXT NOT NULL DEFAULT '',
-    ErAktiv        BOOLEAN NOT NULL DEFAULT TRUE
+    ErAktiv        BOOLEAN NOT NULL DEFAULT TRUE,
+    LogoUrl        TEXT
 );
 
 CREATE TABLE Klasse (
@@ -92,7 +93,8 @@ CREATE TABLE Kaster (
     KjonnId       INT NOT NULL REFERENCES Kjonn(Id),
     KlubbId       INT REFERENCES Klubb(Id),
     KlasseId      INT REFERENCES Klasse(Id),
-    ErAktiv       BOOLEAN NOT NULL DEFAULT TRUE
+    ErAktiv       BOOLEAN NOT NULL DEFAULT TRUE,
+    AvatarUrl     TEXT
 );
 
 CREATE TABLE Stevne (
@@ -110,7 +112,9 @@ CREATE TABLE Stevne (
     ErNM                     BOOLEAN NOT NULL DEFAULT FALSE,
     ErNorgesranking          BOOLEAN NOT NULL DEFAULT FALSE,
     ErFullfort               BOOLEAN NOT NULL DEFAULT FALSE,
-    ErEkskludertFraRekorder  BOOLEAN NOT NULL DEFAULT FALSE
+    ErEkskludertFraRekorder  BOOLEAN NOT NULL DEFAULT FALSE,
+    InnbydelseUrl           TEXT,
+    ResultatUrl             TEXT
 );
 
 CREATE TABLE Resultat (
