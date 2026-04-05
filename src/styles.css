@@ -16,6 +16,105 @@ body {
   padding: 20px 16px;
 }
 
+/* ── Header ── */
+
+.topp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-tittel {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #222;
+}
+
+.meny-knapp {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 28px;
+  height: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.meny-knapp span {
+  display: block;
+  height: 2px;
+  background: #444;
+  border-radius: 2px;
+  transition: transform 0.25s, opacity 0.25s;
+}
+
+/* X-animasjon når menyen er åpen */
+.meny-knapp.aktiv span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+.meny-knapp.aktiv span:nth-child(2) { opacity: 0; }
+.meny-knapp.aktiv span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+
+/* ── Slideout-meny ── */
+
+.meny-bakgrunn {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+}
+
+.meny-bakgrunn.aktiv {
+  display: block;
+}
+
+.sidepanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 260px;
+  background: #fff;
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 300;
+  overflow-y: auto;
+}
+
+.sidepanel.aktiv {
+  transform: translateX(0);
+}
+
+.meny-liste {
+  list-style: none;
+  padding: 16px 0;
+}
+
+.meny-liste li a {
+  display: block;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  color: #1558d6;
+  text-decoration: none;
+}
+
+.meny-liste li a:hover {
+  background: #f0f4ff;
+}
+
+.meny-skillelinje {
+  border-top: 1px solid #e0e0e0;
+  margin: 8px 0;
+}
+
 /* ── Fremsiden ── */
 
 .siste-resultater h1 {

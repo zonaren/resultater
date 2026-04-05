@@ -3,11 +3,68 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hesteskokasting Norge</title>
+  <title>Hesteskokasting Resultater</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+  <header class="topp-header">
+    <span class="header-tittel">Hesteskokasting Resultater</span>
+    <button class="meny-knapp" id="menyKnapp" aria-label="Åpne meny">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Mørk bakgrunn bak menyen -->
+  <div class="meny-bakgrunn" id="menyBakgrunn"></div>
+
+  <!-- Slideout-meny fra høyre -->
+  <nav class="sidepanel" id="sidepanel">
+    <ul class="meny-liste">
+      <li><a href="https://hesteskokasting.no" target="_blank" rel="noopener">Til hesteskokasting.no</a></li>
+      <li class="meny-skillelinje"></li>
+      <li><a href="#/">Hjem</a></li>
+      <li><a href="#/terminliste">Terminliste og Resultat</a></li>
+      <li><a href="#/norgescupen">Norgescupen</a></li>
+      <li><a href="#/norgesranking">Norgesranking</a></li>
+      <li><a href="#/klubber">Klubber</a></li>
+      <li><a href="#/utovere">Utøvere</a></li>
+      <li><a href="#/statistikk">Statistikk</a></li>
+      <li><a href="#/dokumenter">Dokumenter</a></li>
+    </ul>
+  </nav>
+
   <div id="app"></div>
+
   <script type="module" src="app.js"></script>
+  <script>
+    const knapp = document.getElementById('menyKnapp')
+    const panel = document.getElementById('sidepanel')
+    const bakgrunn = document.getElementById('menyBakgrunn')
+
+    function apneMeny() {
+      panel.classList.add('aktiv')
+      bakgrunn.classList.add('aktiv')
+      knapp.classList.add('aktiv')
+    }
+
+    function lukkMeny() {
+      panel.classList.remove('aktiv')
+      bakgrunn.classList.remove('aktiv')
+      knapp.classList.remove('aktiv')
+    }
+
+    knapp.addEventListener('click', () => {
+      panel.classList.contains('aktiv') ? lukkMeny() : apneMeny()
+    })
+
+    bakgrunn.addEventListener('click', lukkMeny)
+
+    document.querySelectorAll('.sidepanel a').forEach(a => {
+      a.addEventListener('click', lukkMeny)
+    })
+  </script>
 </body>
 </html>
