@@ -531,3 +531,147 @@
   color: #c00;
   margin-top: 40px;
 }
+
+/* ── Norgescupen ── */
+
+.nc-side { padding-bottom: 40px; }
+
+.nc-hovudtittel {
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: bold;
+  margin-bottom: 14px;
+}
+
+.nc-filter-rad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+#nc-singel-seksjon { margin-bottom: 32px; }
+#nc-lag-seksjon { margin-bottom: 32px; }
+
+.nc-seksjon-tittel {
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: #31527E;
+  margin-bottom: 4px;
+}
+
+.nc-beskriving {
+  text-align: center;
+  font-size: 0.82rem;
+  color: #555;
+  font-style: italic;
+  margin-bottom: 10px;
+}
+
+.nc-klasse-tabs-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.nc-klasse-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.nc-klasse-tab {
+  padding: 4px 12px;
+  border: 1px solid #31527E;
+  border-radius: 4px 4px 0 0;
+  background: #F6F7FB;
+  color: #31527E;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.nc-klasse-tab.aktiv {
+  background: #31527E;
+  color: #F6F7FB;
+}
+
+.nc-klikk-hint {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.nc-ingen {
+  text-align: center;
+  color: #666;
+  margin-top: 20px;
+}
+
+.nc-tabell {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.nc-thead th {
+  background: #31527E;
+  color: #F6F7FB;
+  text-align: left;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+}
+
+.nc-tabell tbody tr { background: #F6F7FB; }
+.nc-tabell tbody tr:nth-child(4n+3) { background: #eceef3; }
+
+.nc-tabell td {
+  padding: 5px 10px;
+  color: #222;
+  border-bottom: 1px solid #ddd;
+}
+
+.nc-td-pl { width: 36px; }
+
+.nc-td-poeng {
+  width: 80px;
+  text-align: right;
+}
+
+.nc-poeng-celle,
+.nc-lag-poeng-celle {
+  cursor: pointer;
+  color: #31527E;
+  user-select: none;
+  font-weight: 600;
+}
+
+.nc-poeng-celle:hover,
+.nc-lag-poeng-celle:hover { text-decoration: underline; }
+
+.nc-chevron { font-size: 0.7rem; }
+
+.nc-detalj-rad td,
+.nc-lag-detalj-rad td {
+  background: #f0f3f8 !important;
+  padding: 8px 14px;
+}
+
+.nc-detalj-tabell {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.nc-detalj-tabell th {
+  background: #dce3ee;
+  color: #31527E;
+  padding: 4px 8px;
+  text-align: left;
+}
+
+.nc-detalj-tabell td {
+  padding: 3px 8px;
+  border-bottom: 1px solid #ddd;
+  color: #222;
+}
