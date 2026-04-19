@@ -138,7 +138,7 @@ function byggRankingListe(resultater, stevnerMap) {
     const { rader } = entry
     const sorted = [...rader].sort((a, b) => b.prosent - a.prosent)
     const top5 = sorted.slice(0, MIN_STEVNER)
-    const snittProsent = top5.reduce((s, r) => s + r.prosent, 0) / top5.length
+    const snittProsent = Math.round(top5.reduce((s, r) => s + r.prosent, 0) / top5.length * 100) / 100
     const antallStevner = rader.length
     const erGyldig = antallStevner >= MIN_STEVNER
 
@@ -216,7 +216,7 @@ function rankingTabellHtml(liste, sokeTekst) {
         <td>${k.navn}</td>
         <td>${k.klubb}</td>
         <td style="text-align:center">${k.antallStevner}</td>
-        <td class="nc-td-poeng nc-poeng-celle" data-idx="${i}">${formaterProsent(k.snittProsent)}<span class="nc-chevron"> ▼</span></td>
+        <td class="nc-td-poeng nc-poeng-celle" style="white-space:nowrap" data-idx="${i}">${formaterProsent(k.snittProsent)}<span class="nc-chevron"> ▼</span></td>
       </tr>
       <tr class="nc-detalj-rad" data-idx="${i}" style="display:none">
         <td colspan="5">
@@ -248,10 +248,10 @@ function sideSkelettHtml(ar) {
     <div class="nc-side">
       <h1 class="nc-hovudtittel">Norgesranking ${ar}</h1>
       <div style="text-align:center;margin-bottom:8px">
-        <button id="nr-info-knapp" class="btn btn-sm btn-outline-secondary">Skjul info</button>
+        <button id="nr-info-knapp" class="btn btn-sm btn-outline-secondary">Vis info</button>
       </div>
       <hr>
-      ${infoHtml(true)}
+      ${infoHtml(false)}
       <hr>
       <div class="nc-filter-rad" style="margin-bottom:12px">
         <select id="nr-ar" class="tl-select">${arOptions(ar)}</select>
