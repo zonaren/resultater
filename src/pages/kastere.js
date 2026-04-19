@@ -1,4 +1,5 @@
 import { supabase } from '../supabase.js'
+import { kasterNavn, lagKasterSlug as lagSlug } from '../utils/kaster.js'
 
 // ── Konstanter ────────────────────────────────────────────────────────────────
 
@@ -41,16 +42,6 @@ function formaterProsent(p) {
   return prosentFmt.format(p) + ' %'
 }
 
-function kasterNavn(k) {
-  return [k?.fornavn, k?.etternavn].filter(Boolean).join(' ')
-}
-
-function lagSlug(k) {
-  return `${k.id}-` + `${k.etternavn ?? ''}-${k.fornavn ?? ''}`
-    .toLowerCase()
-    .replace(/[æä]/g, 'ae').replace(/[øö]/g, 'o').replace(/å/g, 'a')
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-}
 
 function hentAr(datoStr) {
   return datoStr ? parseInt(datoStr.substring(0, 4)) : null
