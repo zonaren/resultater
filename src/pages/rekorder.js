@@ -1,13 +1,13 @@
 import { supabase } from '../supabase.js'
-import { kasterNavn, lagKasterSlug } from '../utils/kaster.js'
+import { lagKasterSlug } from '../utils/kaster.js'
 
 // ── Konstanter ────────────────────────────────────────────────────────────────
 
 const METODAR = [
-  { verdi: 'kongelag',  label: 'Kongelag',  felt: 'poengkongelag',  maxPoeng: 200 },
-  { verdi: 'minimatch', label: 'Minimatch', felt: 'poengminimatch',  maxPoeng: 200 },
-  { verdi: 'halvmatch', label: 'Halvmatch', felt: 'poengxhalvmatch', maxPoeng: 200 },
-  { verdi: 'heilmatch', label: 'Heilmatch', felt: 'poengxheilmatch', maxPoeng: 200 },
+  { verdi: 'kongelag',  label: 'Kongelag',  maxPoeng: 200 },
+  { verdi: 'minimatch', label: 'Minimatch', maxPoeng: 200 },
+  { verdi: 'halvmatch', label: 'Halvmatch', maxPoeng: 200 },
+  { verdi: 'heilmatch', label: 'Heilmatch', maxPoeng: 200 },
 ]
 
 // ── Modul-tilstand ────────────────────────────────────────────────────────────
@@ -18,8 +18,12 @@ let cache = null
 
 // ── Hjelpefunksjonar ──────────────────────────────────────────────────────────
 
-function erDame(kaster) {
-  return (kaster?.kjonn?.navn ?? '').toLowerCase().includes('dame')
+function erDame(item) {
+  return (item.kjonn_navn ?? '').toLowerCase().includes('dame')
+}
+
+function kasterNamn(item) {
+  return [item.fornavn, item.etternavn].filter(Boolean).join(' ')
 }
 
 function escAttr(s) {
@@ -30,66 +34,25 @@ function escAttr(s) {
 
 async function hentData() {
   if (cache) return cache
-
-  const BATCH = 1000
-  let alleData = []
-  let from = 0
-
-  while (true) {
-    const { data, error } = await supabase
-      .from('resultat')
-      .select(`
-        id,
-        kasterid,
-        poengkongelag, poengminimatch, poengxhalvmatch, poengxheilmatch,
-        kaster:kasterid(id, fornavn, etternavn, kjonn:kjonnid(id, navn)),
-        klubb:klubbid(id, navn),
-        stevne:stevneid(id, navn, dato)
-      `)
-      .range(from, from + BATCH - 1)
-
-    if (error) {
-      cache = { data: alleData, error }
-      return cache
-    }
-
-    alleData = alleData.concat(data ?? [])
-    if ((data?.length ?? 0) < BATCH) break
-    from += BATCH
-  }
-
-  cache = { data: alleData, error: null }
+  const { data, error } = await supabase
+    .from('kaster_rekorder')
+    .select('*')
+  cache = { data: data ?? [], error }
   return cache
 }
 
 // ── Rekord-algoritme ──────────────────────────────────────────────────────────
 
-function byggOgFiltrerListe(alleData, metodeFelt) {
-  const kasterMap = new Map()
-  for (const r of alleData) {
-    const poeng = r[metodeFelt]
-    if (poeng == null) continue
-    const existing = kasterMap.get(r.kasterid)
-    if (!existing || poeng > existing.poeng) {
-      kasterMap.set(r.kasterid, {
-        kaster: r.kaster,
-        klubb: r.klubb,
-        poeng,
-        stevneid: r.stevne?.id,
-        stevneNamn: r.stevne?.navn ?? '–',
-        ar: r.stevne?.dato ? r.stevne.dato.substring(0, 4) : '–',
-      })
-    }
-  }
-
+function byggOgFiltrerListe(alleData) {
   const sok = filtre.sokeTekst.trim().toLowerCase()
-  const liste = [...kasterMap.values()].filter(item => {
-    const dame = erDame(item.kaster)
-    if (filtre.kjønn === 'damer' && !dame) return false
-    if (filtre.kjønn === 'herrer' && dame) return false
+
+  const liste = alleData.filter(item => {
+    if (item.metode !== filtre.metode) return false
+    if (filtre.kjønn === 'damer' && !erDame(item)) return false
+    if (filtre.kjønn === 'herrer' && erDame(item)) return false
     if (sok) {
-      const namn = kasterNavn(item.kaster).toLowerCase()
-      const klubb = (item.klubb?.navn ?? '').toLowerCase()
+      const namn = kasterNamn(item).toLowerCase()
+      const klubb = (item.klubb_namn ?? item.klubb_navn ?? '').toLowerCase()
       if (!namn.includes(sok) && !klubb.includes(sok)) return false
     }
     return true
@@ -112,18 +75,20 @@ function tabellHtml(liste) {
   if (!liste.length) return '<p class="nc-ingen">Ingen rekorder funnet.</p>'
 
   const rader = liste.map(item => {
-    const slug = lagKasterSlug(item.kaster)
-    const dameCls = erDame(item.kaster) ? ' class="rek-dame-rad"' : ''
-    const poengHtml = item.stevneid
-      ? `<span class="rek-poeng-celle" title="${escAttr(item.stevneNamn)}" data-stevneid="${item.stevneid}">${item.poeng}</span>`
+    const kaster = { id: item.kasterid, fornavn: item.fornavn, etternavn: item.etternavn }
+    const slug = lagKasterSlug(kaster)
+    const dameCls = erDame(item) ? ' class="rek-dame-rad"' : ''
+    const klubbNamn = item.klubb_namn ?? item.klubb_navn ?? '–'
+    const poengHtml = item.stevne_id
+      ? `<span class="rek-poeng-celle" title="${escAttr(item.stevne_namn ?? item.stevne_navn)}" data-stevneid="${item.stevne_id}">${item.poeng}</span>`
       : item.poeng
     return `
       <tr${dameCls}>
         <td>${item.plassering}</td>
-        <td><a href="#/kastere/${slug}" class="tl-lenkje">${kasterNavn(item.kaster)}</a></td>
-        <td>${item.klubb?.navn ?? '–'}</td>
+        <td><a href="#/kastere/${slug}" class="tl-lenkje">${kasterNamn(item)}</a></td>
+        <td>${klubbNamn}</td>
         <td>${poengHtml}</td>
-        <td>${item.ar}</td>
+        <td>${item.ar ?? '–'}</td>
       </tr>`
   }).join('')
 
@@ -189,8 +154,7 @@ export async function render(container) {
   }
 
   function oppdaterTabell() {
-    const metode = METODAR.find(m => m.verdi === filtre.metode)
-    const liste = byggOgFiltrerListe(data, metode.felt)
+    const liste = byggOgFiltrerListe(data)
     container.querySelector('#rek-tabell-container').innerHTML = tabellHtml(liste)
   }
 
