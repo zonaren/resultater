@@ -245,8 +245,8 @@ function detaljSkelettHtml(kaster, resultater) {
       <div style="margin-bottom:12px">
         <a href="#/kastere" class="btn btn-sm btn-outline-secondary">← Tilbake</a>
       </div>
-      <h1 class="nc-hovudtittel" style="margin-bottom:2px">${namn}${nr}</h1>
-      <p style="color:#aaa;margin-bottom:12px">${kaster.klubb?.navn ?? '–'}</p>
+      <h1 style="font-size:1.8rem;font-weight:bold;margin-bottom:4px;line-height:1.2">${namn}${nr}</h1>
+      <p style="font-size:1.1rem;color:#aaa;margin-bottom:12px">${kaster.klubb?.navn ?? '–'}</p>
 
       <div class="kaster-tab-rad">
         <button class="btn btn-sm kaster-tab-knapp${filtreDetalj.aktiv === 'resultater' ? ' active' : ''}" data-tab="resultater">Resultater</button>
