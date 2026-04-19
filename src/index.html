@@ -31,10 +31,17 @@
       <li><a href="#/terminliste">Terminliste og Resultat</a></li>
       <li><a href="#/norgescupen">Norgescupen</a></li>
       <li><a href="#/norgesranking">Norgesranking</a></li>
-      <li><a href="#/rekorder">Rekorder</a></li>
       <li><a href="#/klubber">Klubber</a></li>
       <li><a href="#/kastere">Utøvere</a></li>
-      <li><a href="#/statistikk">Statistikk</a></li>
+      <li class="meny-dropdown-item">
+        <button class="meny-dropdown-knapp" id="statistikk-knapp" aria-expanded="false">
+          Statistikk <span class="meny-chevron">▼</span>
+        </button>
+        <ul class="meny-undermeny" id="statistikk-undermeny" style="display:none">
+          <li><a href="#/nmvinnere">NM-vinnere</a></li>
+          <li><a href="#/rekorder">Rekorder</a></li>
+        </ul>
+      </li>
       <li><a href="#/dokumenter">Dokumenter</a></li>
     </ul>
   </nav>
@@ -69,6 +76,15 @@
 
     document.querySelectorAll('.sidepanel a').forEach(a => {
       a.addEventListener('click', lukkMeny)
+    })
+
+    document.getElementById('statistikk-knapp').addEventListener('click', () => {
+      const undermeny = document.getElementById('statistikk-undermeny')
+      const knapp = document.getElementById('statistikk-knapp')
+      const open = undermeny.style.display !== 'none'
+      undermeny.style.display = open ? 'none' : 'block'
+      knapp.setAttribute('aria-expanded', !open)
+      knapp.querySelector('.meny-chevron').textContent = open ? '▼' : '▲'
     })
   </script>
 </body>

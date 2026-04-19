@@ -103,6 +103,34 @@
   margin: 8px 0;
 }
 
+.meny-dropdown-knapp {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  color: #31527E;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.meny-dropdown-knapp:hover { background: #F6F7FB; }
+
+.meny-chevron {
+  float: right;
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.meny-undermeny {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.meny-undermeny li a { padding-left: 36px; }
+
 /* ── Fremsiden ── */
 
 .siste-resultater h1 {
