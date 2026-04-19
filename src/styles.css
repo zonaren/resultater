@@ -675,3 +675,104 @@
   border-bottom: 1px solid #ddd;
   color: #222;
 }
+
+/* ── Kastere: liste ── */
+
+.kaster-liste-kontroller { margin-bottom: 12px; }
+
+.kaster-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.kaster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  margin: 12px 0;
+}
+
+.kaster-kort {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 12px 8px 10px;
+  background: #F6F7FB;
+  transition: box-shadow 0.15s;
+}
+
+.kaster-kort:hover { box-shadow: 0 2px 10px rgba(49,82,126,0.2); }
+
+.kaster-kort img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  background: #ddd;
+}
+
+.kaster-namn {
+  font-size: 0.88rem;
+  color: #31527E;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.kaster-klubb {
+  font-size: 0.78rem;
+  color: #555;
+  text-align: center;
+}
+
+.kaster-paginering {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0;
+  flex-wrap: wrap;
+}
+
+.pag-info {
+  font-size: 0.85rem;
+  color: #555;
+  padding: 0 4px;
+}
+
+/* ── Kastere: detalj ── */
+
+.kaster-tab-rad {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.kaster-tab-knapp {
+  border: 1px solid #31527E;
+  color: #31527E;
+  background: #F6F7FB;
+}
+
+.kaster-tab-knapp.active {
+  background: #31527E;
+  color: #F6F7FB;
+}
+
+.kd-tab { display: block; }
+.kd-skjult { display: none; }
+
+.tl-lenkje {
+  color: #31527E;
+  text-decoration: none;
+}
+
+.tl-lenkje:hover { text-decoration: underline; }
