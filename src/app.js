@@ -5,6 +5,7 @@ import { render as renderNorgescupen } from './pages/norgescupen.js'
 import { render as renderNorgesranking } from './pages/norgesranking.js'
 import { render as renderKastere } from './pages/kastere.js'
 import { render as renderKlubber } from './pages/klubber.js'
+import { render as renderRekorder } from './pages/rekorder.js'
 
 const container = document.getElementById('app')
 
@@ -13,6 +14,7 @@ const ruter = [
   { mønster: /^\/terminliste$/, side: renderTerminliste, params: () => ({}) },
   { mønster: /^\/norgescupen$/, side: renderNorgescupen, params: () => ({}) },
   { mønster: /^\/norgesranking$/, side: renderNorgesranking, params: () => ({}) },
+  { mønster: /^\/rekorder$/, side: renderRekorder, params: () => ({}) },
   { mønster: /^\/kastere\/(\d+)(-[^/]*)?$/, side: renderKastere, params: m => ({ id: m[1] }) },
   { mønster: /^\/kastere$/, side: renderKastere, params: () => ({}) },
   { mønster: /^\/klubber\/(\d+)(-[^/]*)?$/, side: renderKlubber, params: m => ({ id: m[1] }) },

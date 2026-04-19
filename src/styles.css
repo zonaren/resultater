@@ -776,3 +776,15 @@
 }
 
 .tl-lenkje:hover { text-decoration: underline; }
+
+/* ── Rekorder ── */
+
+.rek-dame-rad { background-color: #fff0f5 !important; }
+
+.rek-poeng-celle {
+  color: #6ba4d4;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.rek-poeng-celle:hover { text-decoration: underline; }
