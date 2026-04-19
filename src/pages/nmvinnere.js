@@ -32,10 +32,6 @@ function kasterLenkjeHtml(k) {
   return `<a href="#/kastere/${lagKasterSlug(k)}" class="tl-lenkje">${namn}</a>`
 }
 
-function erGruppeA(r) {
-  return r.gruppe == null || r.gruppe.navn === 'A'
-}
-
 function defaultKjonn(kjonnFilter) {
   return kjonnFilter === 'alltid' ? 'alle' : 'open'
 }
@@ -101,11 +97,12 @@ async function hentData(kategori, kjonn) {
       id, klasseid,
       ${kasterJoin},
       klubb:klubbid(id, navn),
-      gruppe:gruppeid(id, navn),
       stevne:stevneid(id, dato)
     `)
     .eq('plassering', 1)
     .in('stevneid', ids)
+    .in('klasseid', ALLE_GYLDIGE_KLASSAR)
+    .or('gruppeid.is.null,gruppeid.neq.2')
 
   if (filtrertPaaKjonn) {
     const kjonnListe = await hentKjonnIder()
@@ -115,10 +112,6 @@ async function hentData(kategori, kjonn) {
 
   if (kategori.kjonnFilter === 'historisk' && kjonn === 'open') {
     resultatQuery = resultatQuery.eq('klasseid', 1)
-  }
-
-  if (!kategori.kjonnFilter) {
-    resultatQuery = resultatQuery.in('klasseid', ALLE_GYLDIGE_KLASSAR)
   }
 
   const { data: rader, error: e2 } = await resultatQuery
@@ -131,10 +124,8 @@ async function hentData(kategori, kjonn) {
 // ── Filtrering og gruppering ──────────────────────────────────────────────────
 
 function byggListe(alleData) {
-  const filtrert = alleData.filter(erGruppeA)
-
   const gruppeMap = new Map()
-  for (const r of filtrert) {
+  for (const r of alleData) {
     const nokkel = `${r.stevne?.id}-${r.klasseid}`
     if (!gruppeMap.has(nokkel)) {
       gruppeMap.set(nokkel, { ar: hentAr(r.stevne?.dato), stevneId: r.stevne?.id, kastere: [], klubb: r.klubb })

@@ -1,0 +1,25 @@
+# Miljøvariablar
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+
+# Bygg-output
+dist/
+build/
+
+# OS-filer
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logg
+*.log
+npm-debug.log*
