@@ -21,6 +21,7 @@ async function hentKlubbar() {
   const { data, error } = await supabase
     .from('klubb')
     .select('id, navn, logourl')
+    .eq('eraktiv', true)
     .order('navn')
   klubbCache = { data: data ?? [], error }
   return klubbCache
