@@ -8,59 +8,102 @@ export async function render(container, { id } = {}) {
 
   container.innerHTML = '<p class="laster" style="text-align:center;margin-top:40px;">Laster…</p>'
 
-  const [authRes, stevneRes, pameldingRes, klasserRes, grupperRes] = await Promise.all([
-    getUser(),
-    supabase.from('stevne').select('id, navn, dato, sted, erfullfort').eq('id', id).single(),
-    supabase.from('pamelding')
-      .select('id, status, kaster:kasterid(id, fornavn, etternavn, klubb:klubbid(navn))')
-      .eq('stevneid', id)
-      .order('id'),
-    supabase.from('klasse').select('id, navn').order('navn'),
-    supabase.from('gruppe').select('id, navn').order('navn'),
-  ])
+  const auth = await getUser()
+  const erAdminRolle    = auth?.profil?.rolle === 'admin'
+  const erKlubbadminRolle = auth?.profil?.rolle === 'klubbadmin'
+  const erPrivilegert   = erAdminRolle || erKlubbadminRolle
 
-  const auth   = authRes
-  const stevne = stevneRes.data
-  const pameldingar = pameldingRes.data ?? []
-  const klassar     = klasserRes.data ?? []
-  const grupper     = grupperRes.data ?? []
+  // Hent stevne først for å bruke dato og klubbid i relaterte-spørring
+  const { data: stevne } = await supabase
+    .from('stevne')
+    .select('id, navn, dato, sted, erfullfort, klubbid')
+    .eq('id', id)
+    .single()
 
   if (!stevne) {
     container.innerHTML = '<p class="feil" style="text-align:center;margin-top:40px;">Stevnet finst ikkje.</p>'
     return
   }
 
-  const dato = stevne.dato ? datoFmt.format(new Date(stevne.dato)) : ''
+  // Bygg datogrenser for relaterte stevner (+/- 2 dagar)
+  const relaterteFraDato = stevne.dato ? new Date(new Date(stevne.dato).getTime() - 2 * 864e5) : null
+  const relaterteTimDato = stevne.dato ? new Date(new Date(stevne.dato).getTime() + 2 * 864e5) : null
 
-  // Sjekk om innlogga brukar er kobla og ikkje allereie påmeldt
-  const erKobla    = auth?.profil?.kobling_status === 'godkjent'
-  const kasterid   = auth?.profil?.kasterid
-  const erPameldt  = pameldingar.some(p => p.kaster?.id === kasterid)
-  const erAdmin    = auth?.profil?.rolle === 'admin' || auth?.profil?.rolle === 'klubbadmin'
+  // Hent alt parallelt
+  const hentingar = [
+    supabase.from('pamelding')
+      .select('id, status, kasterid, kaster:kasterid(id, fornavn, etternavn, klubb:klubbid(navn))')
+      .eq('stevneid', id)
+      .order('id'),
+    supabase.from('klasse').select('id, navn').order('navn'),
+    supabase.from('gruppe').select('id, navn').order('navn'),
+  ]
+
+  // Relaterte stevner
+  if (stevne.klubbid && relaterteFraDato) {
+    hentingar.push(
+      supabase.from('stevne')
+        .select('id, navn, dato')
+        .eq('klubbid', stevne.klubbid)
+        .eq('erfullfort', false)
+        .neq('id', id)
+        .gte('dato', relaterteFraDato.toISOString())
+        .lte('dato', relaterteTimDato.toISOString())
+        .order('dato')
+    )
+  }
+
+  // Klubbmedlemmar for admin/klubbadmin
+  if (erPrivilegert) {
+    if (erAdminRolle) {
+      hentingar.push(supabase.from('kaster').select('id, fornavn, etternavn, klubb:klubbid(navn)').eq('eraktiv', true).order('etternavn'))
+    } else if (auth.klubber.length) {
+      hentingar.push(supabase.from('kaster').select('id, fornavn, etternavn, klubb:klubbid(navn)').in('klubbid', auth.klubber).eq('eraktiv', true).order('etternavn'))
+    }
+  }
+
+  const resultat = await Promise.all(hentingar)
+
+  const pameldingar   = resultat[0].data ?? []
+  const klassar       = resultat[1].data ?? []
+  const grupper       = resultat[2].data ?? []
+  let relaterte       = []
+  let klubbKastere    = []
+
+  let idx = 3
+  if (stevne.klubbid && relaterteFraDato) { relaterte    = resultat[idx++]?.data ?? [] }
+  if (erPrivilegert)                       { klubbKastere = resultat[idx]?.data ?? []  }
+
+  const dato      = stevne.dato ? datoFmt.format(new Date(stevne.dato)) : ''
+  const erKobla   = auth?.profil?.kobling_status === 'godkjent'
+  const kasterid  = auth?.profil?.kasterid
+  const erPameldt = pameldingar.some(p => p.kasterid === kasterid)
+
+  // ── Eige påmeldingsskjema ────────────────────────────────────────────────────
+  const klasseOpt = klassar.map(k => `<option value="${k.id}">${k.navn}</option>`).join('')
+  const gruppeOpt = grupper.map(g => `<option value="${g.id}">${g.navn}</option>`).join('')
 
   let skjemaHtml = ''
   if (!auth) {
     skjemaHtml = `<div class="alert alert-info">
       <a href="#/logginn?redirect=/stevne/${id}/pamelding">Logg inn</a> for å melde deg på.
     </div>`
-  } else if (!erKobla) {
+  } else if (!erKobla && !erPrivilegert) {
     skjemaHtml = `<div class="alert alert-warning">
       Du må <a href="#/minside">koble kontoen din til ein utøvarprofil</a> for å melde deg på.
     </div>`
   } else if (stevne.erfullfort) {
     skjemaHtml = `<div class="alert alert-secondary">Dette stevnet er fullført. Påmelding er stengt.</div>`
-  } else if (erPameldt) {
-    const min = pameldingar.find(p => p.kaster?.id === kasterid)
+  } else if (erKobla && erPameldt) {
+    const min = pameldingar.find(p => p.kasterid === kasterid)
     skjemaHtml = `
       <div class="alert alert-success d-flex justify-content-between align-items-center">
         <span>Du er påmeldt (status: <strong>${min?.status}</strong>)</span>
         <button id="avmeld-knapp" class="btn btn-sm btn-outline-danger">Meld av</button>
       </div>`
-  } else {
-    const klasseOpt = klassar.map(k => `<option value="${k.id}">${k.navn}</option>`).join('')
-    const gruppeOpt = grupper.map(g => `<option value="${g.id}">${g.navn}</option>`).join('')
+  } else if (erKobla && !stevne.erfullfort) {
     skjemaHtml = `
-      <form id="pamelding-skjema" class="card p-3 mb-4">
+      <form id="pamelding-skjema" class="card p-3 mb-3">
         <h5 class="mb-3">Meld deg på</h5>
         <div class="mb-3">
           <label class="form-label">Klasse</label>
@@ -83,15 +126,67 @@ export async function render(container, { id } = {}) {
       </form>`
   }
 
+  // ── Admin/klubbadmin: meld på andre ─────────────────────────────────────────
+  let adminSkjemaHtml = ''
+  if (erPrivilegert && !stevne.erfullfort) {
+    const allereie = new Set(pameldingar.map(p => p.kasterid))
+    const tilgjengelige = klubbKastere.filter(k => !allereie.has(k.id))
+    const kasterOpt = tilgjengelige.map(k =>
+      `<option value="${k.id}">${k.etternavn}, ${k.fornavn} — ${k.klubb?.navn ?? ''}</option>`
+    ).join('')
+
+    adminSkjemaHtml = `
+      <form id="admin-pamelding-skjema" class="card p-3 mb-3 border-warning">
+        <h5 class="mb-3">Meld på klubbmedlem</h5>
+        <div class="mb-3">
+          <label class="form-label">Utøvar</label>
+          <select class="form-select" name="admin_kasterid" required>
+            <option value="">— vel utøvar —</option>${kasterOpt}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Klasse</label>
+          <select class="form-select" name="klasse_id">
+            <option value="">— vel (valfritt) —</option>${klasseOpt}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Gruppe</label>
+          <select class="form-select" name="gruppe_id">
+            <option value="">— vel (valfritt) —</option>${gruppeOpt}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Merknad</label>
+          <input type="text" class="form-control" name="merknad" placeholder="Valfri merknad">
+        </div>
+        <div id="admin-pm-feil" class="alert alert-danger d-none"></div>
+        <button type="submit" class="btn btn-warning">Meld på</button>
+      </form>`
+  }
+
+  // ── Relaterte stevner ────────────────────────────────────────────────────────
+  const relaterteHtml = relaterte.length ? `
+    <div class="mt-4 mb-3">
+      <h5>Andre stevner same helg (same arrangør)</h5>
+      <ul class="list-unstyled">
+        ${relaterte.map(s => {
+          const d = s.dato ? datoFmt.format(new Date(s.dato)) : ''
+          return `<li><a href="#/stevne/${s.id}/pamelding">${s.navn} — ${d}</a></li>`
+        }).join('')}
+      </ul>
+    </div>` : ''
+
+  // ── Påmeldingsliste ──────────────────────────────────────────────────────────
   const listHtml = pameldingar.length
     ? `<table class="table table-sm">
-        <thead><tr><th>Namn</th><th>Klubb</th><th>Status</th>${erAdmin ? '<th></th>' : ''}</tr></thead>
+        <thead><tr><th>Namn</th><th>Klubb</th><th>Status</th>${erPrivilegert ? '<th></th>' : ''}</tr></thead>
         <tbody>
           ${pameldingar.map(p => `<tr>
             <td>${p.kaster ? `<a href="#/kastere/${p.kaster.id}">${p.kaster.fornavn} ${p.kaster.etternavn}</a>` : '—'}</td>
             <td>${p.kaster?.klubb?.navn ?? ''}</td>
             <td><span class="badge bg-${p.status === 'bekreftet' ? 'success' : p.status === 'avmeldt' ? 'secondary' : 'primary'}">${p.status}</span></td>
-            ${erAdmin ? `<td><button class="btn btn-xs btn-outline-danger btn-sm fjern-pm" data-id="${p.id}">Fjern</button></td>` : ''}
+            ${erPrivilegert ? `<td><button class="btn btn-sm btn-outline-danger fjern-pm" data-id="${p.id}">Fjern</button></td>` : ''}
           </tr>`).join('')}
         </tbody>
       </table>`
@@ -102,17 +197,18 @@ export async function render(container, { id } = {}) {
       <h2 class="mb-1">${stevne.navn}</h2>
       <p class="text-muted mb-4">${dato}${stevne.sted ? ' · ' + stevne.sted : ''}</p>
       ${skjemaHtml}
+      ${adminSkjemaHtml}
+      ${relaterteHtml}
       <h5 class="mt-4 mb-2">Påmeldingar (${pameldingar.length})</h5>
       ${listHtml}
     </div>`
 
-  // Påmelding-skjema
+  // Eige påmeldingsskjema
   container.querySelector('#pamelding-skjema')?.addEventListener('submit', async e => {
     e.preventDefault()
     const fd   = new FormData(e.target)
     const feil = container.querySelector('#pm-feil')
     feil.classList.add('d-none')
-
     const { error } = await supabase.from('pamelding').insert({
       stevneid:  Number(id),
       kasterid,
@@ -121,20 +217,39 @@ export async function render(container, { id } = {}) {
       gruppe_id: fd.get('gruppe_id') ? Number(fd.get('gruppe_id')) : null,
       merknad:   fd.get('merknad').trim() || null,
     })
+    if (error) { feil.textContent = error.message; feil.classList.remove('d-none'); return }
+    render(container, { id })
+  })
 
+  // Admin: meld på andre
+  container.querySelector('#admin-pamelding-skjema')?.addEventListener('submit', async e => {
+    e.preventDefault()
+    const fd   = new FormData(e.target)
+    const feil = container.querySelector('#admin-pm-feil')
+    feil.classList.add('d-none')
+    const velgtKasterid = Number(fd.get('admin_kasterid'))
+    if (!velgtKasterid) { feil.textContent = 'Vel ein utøvar.'; feil.classList.remove('d-none'); return }
+    const { error } = await supabase.from('pamelding').insert({
+      stevneid:  Number(id),
+      kasterid:  velgtKasterid,
+      bruker_id: auth.user.id,
+      klasse_id: fd.get('klasse_id') ? Number(fd.get('klasse_id')) : null,
+      gruppe_id: fd.get('gruppe_id') ? Number(fd.get('gruppe_id')) : null,
+      merknad:   fd.get('merknad').trim() || null,
+    })
     if (error) { feil.textContent = error.message; feil.classList.remove('d-none'); return }
     render(container, { id })
   })
 
   // Avmelding
   container.querySelector('#avmeld-knapp')?.addEventListener('click', async () => {
-    const min = pameldingar.find(p => p.kaster?.id === kasterid)
+    const min = pameldingar.find(p => p.kasterid === kasterid)
     if (!min || !confirm('Vil du melde deg av?')) return
     await supabase.from('pamelding').delete().eq('id', min.id)
     render(container, { id })
   })
 
-  // Admin: fjern vilkårleg påmelding
+  // Admin: fjern påmelding
   container.querySelectorAll('.fjern-pm').forEach(knapp => {
     knapp.addEventListener('click', async () => {
       if (!confirm('Fjern påmelding?')) return

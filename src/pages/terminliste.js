@@ -25,6 +25,8 @@ const filtre = {
 
 // Mellomlagret fullstendig datasett fra Supabase (for klient-side filtrering)
 let allData = []
+let _auth = null
+let _pameldteIds = new Set()
 
 // ── Supabase-henting ──────────────────────────────────────────────────────────
 
@@ -32,7 +34,7 @@ async function hentStevner() {
   const { data, error } = await supabase
     .from('stevne')
     .select(`
-      id, navn, sted, dato, ernm, innbydelseurl, resultaturl,
+      id, navn, sted, dato, ernm, erfullfort, innbydelseurl, resultaturl,
       klubb:klubbid(id, navn),
       stevnetype:stevnetypeid(id, navn),
       innledende:kastemetode!innledendekastemetodeid(id, navn),
@@ -151,12 +153,23 @@ function kortHtml(s) {
     ? `<a class="stevne-lenke" href="#/resultat/${s.id}">Vis resultat</a>`
     : ''
 
+  const erKomande = s.dato && new Date(s.dato) > new Date()
+  const rolle = _auth?.profil?.rolle
+  const harTilgang = _auth?.profil?.kobling_status === 'godkjent' || rolle === 'admin' || rolle === 'klubbadmin'
+  const erPameldt = _pameldteIds.has(s.id)
+  const pameldingLenke = !harTilgang ? ''
+    : erPameldt
+      ? `<a class="stevne-lenke" href="#/stevne/${s.id}/pamelding">Påmeldt ✓</a>`
+      : erKomande && !s.erfullfort
+        ? `<a class="stevne-lenke" href="#/stevne/${s.id}/pamelding">Meld meg på</a>`
+        : ''
+
   return `
     <div class="stevne-kort tl-kort">
       <a class="tl-navn tl-navn-lenke" href="#/resultat/${s.id}">${nm}${s.navn}</a>
       <p class="stevne-dato">${dato}</p>
       ${sted}${arrangør}${type}
-      ${innbydelse}${resultat}
+      ${innbydelse}${resultat}${pameldingLenke}
     </div>
   `
 }
@@ -173,7 +186,13 @@ function byggListe(filtrert) {
 export async function render(container) {
   container.innerHTML = `<p class="laster">Laster terminliste...</p>`
 
-  const [{ data, error }, filtervalg] = await Promise.all([hentStevner(), hentFiltervalg()])
+  const [{ data, error }, filtervalg, auth] = await Promise.all([hentStevner(), hentFiltervalg(), getUser()])
+  _auth = auth
+  _pameldteIds = new Set()
+  if (auth?.user) {
+    const { data: pm } = await supabase.from('pamelding').select('stevneid').eq('bruker_id', auth.user.id)
+    _pameldteIds = new Set((pm ?? []).map(r => r.stevneid))
+  }
 
   if (error) {
     container.innerHTML = `<p class="feil">Kunne ikke laste terminliste.</p>`

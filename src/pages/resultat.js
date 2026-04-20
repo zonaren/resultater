@@ -14,7 +14,7 @@ async function hentStevne(id) {
   const { data, error } = await supabase
     .from('stevne')
     .select(`
-      id, navn, sted, dato, resultaturl, juryleder,
+      id, navn, sted, dato, erfullfort, resultaturl, juryleder,
       stevnetype:stevnetypeid(navn),
       kategori:kategoriid(navn),
       kontakt:kontaktkasterid(fornavn, etternavn),
@@ -253,7 +253,7 @@ export async function render(container, params) {
         <a href="#/stevne/${id}/admin" class="btn btn-sm btn-warning">Rediger stevne</a>
         <a href="#/stevne/${id}/pamelding" class="btn btn-sm btn-outline-info">Påmeldingar</a>`
       felles.prepend(bar)
-    } else if (auth.profil.kobling_status === 'godkjent') {
+    } else if (auth.profil.kobling_status === 'godkjent' && !stevne.erfullfort) {
       const link = document.createElement('div')
       link.className = 'mb-2'
       link.innerHTML = `<a href="#/stevne/${id}/pamelding" class="btn btn-sm btn-primary">Meld meg på</a>`

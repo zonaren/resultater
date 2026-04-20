@@ -69,18 +69,25 @@ async function _lenkaTilKaster(kasterid) {
 async function _minePameldingar(brukerId) {
   const { data } = await supabase
     .from('pamelding')
-    .select('id, status, opprettet_at, stevne:stevneid(id, navn, dato)')
+    .select('id, stevne:stevneid(id, navn, dato)')
     .eq('bruker_id', brukerId)
-    .order('opprettet_at', { ascending: false })
-    .limit(20)
+    .order('stevneid', { ascending: true })
+    .limit(50)
   if (!data?.length) return '<p class="text-muted">Ingen påmeldingar enno.</p>'
 
-  const rader = data.map(p => {
+  // Sorter på stevnedato stigande (neste stevne først)
+  const sortert = [...data].sort((a, b) => {
+    const da = a.stevne?.dato ? new Date(a.stevne.dato) : 0
+    const db = b.stevne?.dato ? new Date(b.stevne.dato) : 0
+    return da - db
+  })
+
+  const rader = sortert.map(p => {
     const dato = p.stevne?.dato ? new Date(p.stevne.dato).toLocaleDateString('nb-NO') : ''
     return `<tr>
       <td><a href="#/stevne/${p.stevne?.id}/pamelding">${p.stevne?.navn ?? ''}</a></td>
       <td>${dato}</td>
-      <td><span class="badge bg-${p.status === 'bekreftet' ? 'success' : p.status === 'avmeldt' ? 'secondary' : 'primary'}">${p.status}</span></td>
+      <td><a href="#/stevne/${p.stevne?.id}/pamelding" class="btn btn-sm btn-outline-danger">Meld av</a></td>
     </tr>`
   }).join('')
 
@@ -88,7 +95,7 @@ async function _minePameldingar(brukerId) {
     <div class="card mb-4">
       <div class="card-body">
         <h5 class="card-title">Påmeldingar</h5>
-        <table class="table table-sm"><thead><tr><th>Stevne</th><th>Dato</th><th>Status</th></tr></thead>
+        <table class="table table-sm"><thead><tr><th>Stevne</th><th>Dato</th><th></th></tr></thead>
         <tbody>${rader}</tbody></table>
       </div>
     </div>`
