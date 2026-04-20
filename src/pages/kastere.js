@@ -1,5 +1,6 @@
 import { supabase } from '../supabase.js'
 import { kasterNavn, lagKasterSlug as lagSlug } from '../utils/kaster.js'
+import { getUser } from '../utils/auth.js'
 
 // ── Konstanter ────────────────────────────────────────────────────────────────
 
@@ -512,6 +513,14 @@ async function renderListe(container) {
     filtrerOgVis()
     container.querySelector('.nc-side').scrollIntoView({ behavior: 'smooth' })
   })
+
+  getUser().then(auth => {
+    if (!auth?.profil || (auth.profil.rolle !== 'admin' && auth.profil.rolle !== 'klubbadmin')) return
+    const bar = document.createElement('div')
+    bar.className = 'mb-2 px-2'
+    bar.innerHTML = `<a href="#/kaster/ny" class="btn btn-sm btn-success">+ Ny utøvar</a>`
+    container.querySelector('.nc-side')?.prepend(bar)
+  })
 }
 
 // ── Render: Detalj ────────────────────────────────────────────────────────────
@@ -599,6 +608,17 @@ async function renderDetalj(container, id) {
   container.querySelector('#kd-graf-til').addEventListener('change', e => {
     filtreDetalj.grafTil = e.target.value || null
     oppdaterGraf()
+  })
+
+  getUser().then(auth => {
+    if (!auth?.profil) return
+    const kanRedigere = auth.profil.rolle === 'admin' ||
+      (auth.profil.rolle === 'klubbadmin' && auth.klubber.includes(kaster.klubbid))
+    if (!kanRedigere) return
+    const bar = document.createElement('div')
+    bar.className = 'mb-2 px-2'
+    bar.innerHTML = `<a href="#/kaster/${id}/admin" class="btn btn-sm btn-warning">Rediger utøvar</a>`
+    container.querySelector('.nc-side')?.prepend(bar)
   })
 }
 

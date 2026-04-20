@@ -1,4 +1,5 @@
 import { supabase } from '../supabase.js'
+import { getUser } from '../utils/auth.js'
 
 const datoFormat = new Intl.DateTimeFormat('nb-NO', {
   weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
@@ -238,4 +239,25 @@ export async function render(container, params) {
 
     </div>
   `
+
+  getUser().then(auth => {
+    if (!auth?.profil) return
+    const felles = container.querySelector('.res-felles')
+    if (!felles) return
+    const kanRedigere = auth.profil.rolle === 'admin' ||
+      (auth.profil.rolle === 'klubbadmin' && auth.klubber.includes(stevne.klubbid))
+    if (kanRedigere) {
+      const bar = document.createElement('div')
+      bar.className = 'mb-2 d-flex gap-2 flex-wrap'
+      bar.innerHTML = `
+        <a href="#/stevne/${id}/admin" class="btn btn-sm btn-warning">Rediger stevne</a>
+        <a href="#/stevne/${id}/pamelding" class="btn btn-sm btn-outline-info">Påmeldingar</a>`
+      felles.prepend(bar)
+    } else if (auth.profil.kobling_status === 'godkjent') {
+      const link = document.createElement('div')
+      link.className = 'mb-2'
+      link.innerHTML = `<a href="#/stevne/${id}/pamelding" class="btn btn-sm btn-primary">Meld meg på</a>`
+      felles.prepend(link)
+    }
+  })
 }

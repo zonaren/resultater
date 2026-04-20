@@ -1,4 +1,5 @@
 import { supabase } from '../supabase.js'
+import { getUser } from '../utils/auth.js'
 
 // ── Dato-formatering ──────────────────────────────────────────────────────────
 
@@ -245,6 +246,14 @@ export async function render(container) {
   `
 
   oppdaterListe()
+
+  getUser().then(auth => {
+    if (!auth?.profil || (auth.profil.rolle !== 'admin' && auth.profil.rolle !== 'klubbadmin')) return
+    const bar = document.createElement('div')
+    bar.className = 'mb-3 px-2 d-flex gap-2'
+    bar.innerHTML = `<a href="#/stevne/ny" class="btn btn-sm btn-success">+ Nytt stevne</a>`
+    container.querySelector('.terminliste')?.prepend(bar)
+  })
 
   // ── Event-lyttere ──
 

@@ -1,5 +1,6 @@
 import { supabase } from '../supabase.js'
 import { kasterNavn, lagKasterSlug, lagKlubbSlug } from '../utils/kaster.js'
+import { getUser } from '../utils/auth.js'
 
 // ── Konstanter ────────────────────────────────────────────────────────────────
 
@@ -176,6 +177,14 @@ async function renderListe(container) {
     filtreListe.sokeTekst = container.querySelector('#klubb-sok').value
     filtrerOgVis()
   })
+
+  getUser().then(auth => {
+    if (!auth?.profil || auth.profil.rolle !== 'admin') return
+    const bar = document.createElement('div')
+    bar.className = 'mb-2 px-2'
+    bar.innerHTML = `<a href="#/klubber/ny" class="btn btn-sm btn-success">+ Ny klubb</a>`
+    container.querySelector('.nc-side')?.prepend(bar)
+  })
 }
 
 // ── Render: Detalj ────────────────────────────────────────────────────────────
@@ -217,6 +226,17 @@ async function renderDetalj(container, id) {
   container.querySelector('#klubb-detalj-sok-knapp').addEventListener('click', () => {
     filtreDetalj.sokeTekst = container.querySelector('#klubb-detalj-sok').value
     oppdaterListe()
+  })
+
+  getUser().then(auth => {
+    if (!auth?.profil) return
+    const kanRedigere = auth.profil.rolle === 'admin' ||
+      (auth.profil.rolle === 'klubbadmin' && auth.klubber.includes(klubb.id))
+    if (!kanRedigere) return
+    const bar = document.createElement('div')
+    bar.className = 'mb-2 px-2'
+    bar.innerHTML = `<a href="#/klubber/${id}/admin" class="btn btn-sm btn-warning">Rediger klubb</a>`
+    container.querySelector('.nc-side')?.prepend(bar)
   })
 }
 
