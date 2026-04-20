@@ -133,12 +133,43 @@
 
 /* ── Fremsiden ── */
 
-.siste-resultater h1 {
+.heimeside { padding-bottom: 40px; }
+
+.heimeside-tittel {
   text-align: center;
-  font-size: 1.1rem;
+  font-size: 1.6rem;
   font-weight: bold;
-  margin-bottom: 14px;
+  margin-bottom: 24px;
 }
+
+.heimeside-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .heimeside-grid { grid-template-columns: 1fr; }
+}
+
+.heimeside-seksjon-tittel {
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.heimeside-meir-lenke {
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #31527E;
+  text-decoration: none;
+}
+
+.heimeside-meir-lenke:hover { text-decoration: underline; }
 
 .stevne-liste {
   display: flex;
@@ -173,6 +204,12 @@
 }
 
 .stevne-lenke:hover { text-decoration: underline; }
+
+.stevne-lenke-inaktiv {
+  display: block;
+  font-size: 0.85rem;
+  color: #888;
+}
 
 /* ── Terminliste ── */
 
