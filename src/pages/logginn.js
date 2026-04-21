@@ -57,7 +57,7 @@ export async function render(container) {
           </div>
           <div id="reg-feil" class="alert alert-danger d-none"></div>
           <div id="reg-suksess" class="alert alert-success d-none">
-            Konto oppretta! Sjekk e-posten din for å bekrefte adressa.
+            Konto oppretta! Du kan no logge inn.
           </div>
           <button type="submit" class="btn btn-success w-100">Opprett konto</button>
         </form>
