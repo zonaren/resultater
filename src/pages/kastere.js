@@ -24,7 +24,8 @@ const filtreDetalj = {
   grafTil: null,
 }
 
-let kasterCache = null
+let kasterCacheAktive = null
+let kasterCacheAlle = null
 let detaljCache = new Map()
 let aktivChart = null
 
@@ -62,15 +63,22 @@ function ødeleggChart() {
 
 // ── Data-henting ──────────────────────────────────────────────────────────────
 
-async function hentKastere() {
-  if (kasterCache) return kasterCache
-  const { data, error } = await supabase
+async function hentKastere(berreAktive) {
+  if (berreAktive && kasterCacheAktive) return kasterCacheAktive
+  if (!berreAktive && kasterCacheAlle) return kasterCacheAlle
+
+  let query = supabase
     .from('kaster')
     .select('id, fornavn, etternavn, eraktiv, avatarurl, klubb:klubbid(id, navn)')
     .order('etternavn')
     .order('fornavn')
-  kasterCache = { data: data ?? [], error }
-  return kasterCache
+  if (berreAktive) query = query.eq('eraktiv', true)
+
+  const { data, error } = await query
+  const result = { data: data ?? [], error }
+  if (berreAktive) kasterCacheAktive = result
+  else kasterCacheAlle = result
+  return result
 }
 
 async function hentDetalj(id) {
@@ -190,8 +198,7 @@ function listeSkelettHtml() {
     <div class="nc-side">
       <div class="kaster-liste-kontroller">
         <div class="nc-filter-rad">
-          <input id="kaster-sok" type="text" class="tl-select" placeholder="Søk på navn/klubb" value="">
-          <button id="kaster-sok-knapp" class="btn btn-secondary btn-sm">Søk</button>
+          <input id="kaster-sok" type="search" class="tl-select" placeholder="Søk på navn/klubb" value="">
         </div>
         <div style="margin-top:8px">
           <label class="kaster-checkbox-label">
@@ -451,18 +458,18 @@ async function renderListe(container) {
   filtreListe.side = 1
 
   container.innerHTML = '<p class="laster">Laster utøvere...</p>'
-  const { data: alleKastere, error } = await hentKastere()
-  if (error) {
+  const init = await hentKastere(true)
+  if (init.error) {
     container.innerHTML = '<p class="feil">Kunne ikkje laste utøvere.</p>'
     return
   }
 
+  let kastereData = init.data
   container.innerHTML = listeSkelettHtml()
 
   function filtrerOgVis() {
     const sok = filtreListe.sokeTekst.trim().toLowerCase()
-    let filtrert = alleKastere
-    if (!filtreListe.visAlle) filtrert = filtrert.filter(k => k.eraktiv)
+    let filtrert = kastereData
     if (sok) filtrert = filtrert.filter(k =>
       kasterNavn(k).toLowerCase().includes(sok) ||
       (k.klubb?.navn ?? '').toLowerCase().includes(sok)
@@ -486,23 +493,17 @@ async function renderListe(container) {
 
   filtrerOgVis()
 
-  container.querySelector('#kaster-sok').addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      filtreListe.sokeTekst = e.target.value
-      filtreListe.side = 1
-      filtrerOgVis()
-    }
-  })
-
-  container.querySelector('#kaster-sok-knapp').addEventListener('click', () => {
-    filtreListe.sokeTekst = container.querySelector('#kaster-sok').value
+  container.querySelector('#kaster-sok').addEventListener('input', e => {
+    filtreListe.sokeTekst = e.target.value
     filtreListe.side = 1
     filtrerOgVis()
   })
 
-  container.querySelector('#kaster-berre-aktive').addEventListener('change', e => {
+  container.querySelector('#kaster-berre-aktive').addEventListener('change', async e => {
     filtreListe.visAlle = !e.target.checked
     filtreListe.side = 1
+    const { data, error } = await hentKastere(!filtreListe.visAlle)
+    if (!error) kastereData = data
     filtrerOgVis()
   })
 
