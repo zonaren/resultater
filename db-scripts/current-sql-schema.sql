@@ -12,6 +12,18 @@ CREATE TABLE public.antallTellendeNc (
   max_dnc integer NOT NULL DEFAULT 6,
   CONSTRAINT antallTellendeNc_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.bruker_profil (
+  id uuid NOT NULL,
+  rolle text NOT NULL DEFAULT 'bruker'::text CHECK (rolle = ANY (ARRAY['admin'::text, 'klubbadmin'::text, 'bruker'::text])),
+  kasterid integer,
+  kobling_status text NOT NULL DEFAULT 'ingen'::text CHECK (kobling_status = ANY (ARRAY['ingen'::text, 'venter'::text, 'godkjent'::text, 'avvist'::text])),
+  kobling_kasterid integer,
+  opprettet_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT bruker_profil_pkey PRIMARY KEY (id),
+  CONSTRAINT bruker_profil_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id),
+  CONSTRAINT bruker_profil_kasterid_fkey FOREIGN KEY (kasterid) REFERENCES public.kaster(id),
+  CONSTRAINT bruker_profil_kobling_kasterid_fkey FOREIGN KEY (kobling_kasterid) REFERENCES public.kaster(id)
+);
 CREATE TABLE public.gruppe (
   id integer NOT NULL DEFAULT nextval('gruppe_id_seq'::regclass),
   navn text NOT NULL,
@@ -71,6 +83,17 @@ CREATE TABLE public.klubb (
   logourl text,
   CONSTRAINT klubb_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.klubbadmin_klubber (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  bruker_id uuid NOT NULL,
+  klubbid integer NOT NULL,
+  tildelt_av uuid,
+  tildelt_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT klubbadmin_klubber_pkey PRIMARY KEY (id),
+  CONSTRAINT klubbadmin_klubber_bruker_id_fkey FOREIGN KEY (bruker_id) REFERENCES auth.users(id),
+  CONSTRAINT klubbadmin_klubber_klubbid_fkey FOREIGN KEY (klubbid) REFERENCES public.klubb(id),
+  CONSTRAINT klubbadmin_klubber_tildelt_av_fkey FOREIGN KEY (tildelt_av) REFERENCES auth.users(id)
+);
 CREATE TABLE public.norgescuppoeng (
   id integer NOT NULL DEFAULT nextval('norgescuppoeng_id_seq'::regclass),
   plassering integer NOT NULL,
@@ -79,6 +102,23 @@ CREATE TABLE public.norgescuppoeng (
   gjelderfraaar integer NOT NULL,
   gjeldertilaar integer,
   CONSTRAINT norgescuppoeng_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.pamelding (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  stevneid integer NOT NULL,
+  kasterid integer NOT NULL,
+  bruker_id uuid NOT NULL,
+  klasse_id integer,
+  gruppe_id integer,
+  merknad text,
+  status text NOT NULL DEFAULT 'pameldt'::text CHECK (status = ANY (ARRAY['pameldt'::text, 'avmeldt'::text, 'bekreftet'::text])),
+  opprettet_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT pamelding_pkey PRIMARY KEY (id),
+  CONSTRAINT pamelding_stevneid_fkey FOREIGN KEY (stevneid) REFERENCES public.stevne(id),
+  CONSTRAINT pamelding_kasterid_fkey FOREIGN KEY (kasterid) REFERENCES public.kaster(id),
+  CONSTRAINT pamelding_bruker_id_fkey FOREIGN KEY (bruker_id) REFERENCES auth.users(id),
+  CONSTRAINT pamelding_klasse_id_fkey FOREIGN KEY (klasse_id) REFERENCES public.klasse(id),
+  CONSTRAINT pamelding_gruppe_id_fkey FOREIGN KEY (gruppe_id) REFERENCES public.gruppe(id)
 );
 CREATE TABLE public.resultat (
   id integer NOT NULL DEFAULT nextval('resultat_id_seq'::regclass),
