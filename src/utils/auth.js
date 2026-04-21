@@ -13,7 +13,7 @@ async function _hentCache() {
     .from('bruker_profil')
     .select('rolle, kasterid, kobling_status, kobling_kasterid')
     .eq('id', session.user.id)
-    .single()
+    .maybeSingle()
 
   let klubber = []
   if (profil?.rolle === 'klubbadmin') {
