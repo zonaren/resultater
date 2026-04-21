@@ -399,6 +399,49 @@
   cursor: pointer;
 }
 
+/* Terminliste tabell (desktop) */
+
+.tl-tabell {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.tl-th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 2px solid #31527E;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  color: #ddd;
+}
+
+.tl-th:last-child { cursor: default; }
+
+.tl-th:not(:last-child):hover { background: rgba(49, 82, 126, 0.25); }
+
+.tl-sort-ikon {
+  margin-left: 4px;
+  font-size: 0.7rem;
+  opacity: 0.35;
+}
+
+.tl-sort-ikon.aktiv {
+  opacity: 1;
+  color: #6a9fd8;
+}
+
+.tl-tabell tbody .tl-tr:hover { background: rgba(255, 255, 255, 0.04); }
+
+.tl-tabell td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #2a2a2a;
+  vertical-align: middle;
+}
+
+.tl-innbydelse-ikon { font-size: 1rem; }
+
 @media (max-width: 600px) {
   .tl-filter-rad { display: none; }
   .tl-mobil-rad { display: flex; }

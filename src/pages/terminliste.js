@@ -12,6 +12,32 @@ function formaterDato(datoStr) {
   return datoFormat.format(new Date(datoStr))
 }
 
+// ── Sortering ─────────────────────────────────────────────────────────────────
+
+const sortering = { kolonne: 'dato', retning: 'asc' }
+
+function sorterVerdi(s, kolonne) {
+  switch (kolonne) {
+    case 'navn': return s.navn ?? ''
+    case 'dato': return s.dato ?? ''
+    case 'sted': return s.sted ?? ''
+    case 'metode': return [s.innledende?.navn, s.avsluttende?.navn].filter(Boolean).join(' ')
+    case 'arrangør': return s.klubb?.navn ?? ''
+    case 'type': return s.stevnetype?.navn ?? ''
+    case 'klassifisering': return s.kategori?.navn ?? ''
+    default: return ''
+  }
+}
+
+function sorterData(data) {
+  return [...data].sort((a, b) => {
+    const va = sorterVerdi(a, sortering.kolonne)
+    const vb = sorterVerdi(b, sortering.kolonne)
+    const cmp = va.localeCompare(vb, 'nb')
+    return sortering.retning === 'asc' ? cmp : -cmp
+  })
+}
+
 // ── Filterobjekt ──────────────────────────────────────────────────────────────
 
 const filtre = {
@@ -140,6 +166,60 @@ function dropdownOptions(liste, valgtId, tomLabel) {
   return html
 }
 
+// ── Tabell (desktop) ──────────────────────────────────────────────────────────
+
+const tabellKolonner = [
+  { id: 'navn', label: 'Stevne' },
+  { id: 'dato', label: 'Dato' },
+  { id: 'sted', label: 'Sted' },
+  { id: 'metode', label: 'Metode' },
+  { id: 'arrangør', label: 'Arrangør' },
+  { id: 'type', label: 'Type' },
+  { id: 'klassifisering', label: 'Klassifisering' },
+]
+
+function sortikonHtml(kolonne) {
+  if (sortering.kolonne !== kolonne) return '<span class="tl-sort-ikon">↕</span>'
+  return sortering.retning === 'asc'
+    ? '<span class="tl-sort-ikon aktiv">↑</span>'
+    : '<span class="tl-sort-ikon aktiv">↓</span>'
+}
+
+function tabellRadHtml(s) {
+  const dato = s.dato ? new Date(s.dato).toLocaleDateString('nb-NO') : ''
+  const metode = [s.innledende?.navn, s.avsluttende?.navn].filter(Boolean).join(' \\ ')
+  const nm = s.ernm ? '<span class="tl-nm-merke">NM</span> ' : ''
+  const innbydelse = s.innbydelseurl
+    ? `<a href="${s.innbydelseurl}" target="_blank" rel="noopener" class="tl-innbydelse-ikon" title="Innbydelse">📄</a>`
+    : ''
+  return `<tr class="tl-tr">
+    <td><a class="tl-lenkje" href="#/resultat/${s.id}">${nm}${s.navn ?? ''}</a></td>
+    <td>${dato}</td>
+    <td>${s.sted ?? ''}</td>
+    <td>${metode}</td>
+    <td>${s.klubb?.navn ?? ''}</td>
+    <td>${s.stevnetype?.navn ?? ''}</td>
+    <td>${s.kategori?.navn ?? ''}</td>
+    <td>${innbydelse}</td>
+  </tr>`
+}
+
+function tabellHtml(filtrert) {
+  if (filtrert.length === 0) return '<p class="laster">Ingen stevner funnet med valgte filtre.</p>'
+  const thead = `<thead><tr>
+    ${tabellKolonner.map(k => `<th class="tl-th" data-kolonne="${k.id}">${k.label}${sortikonHtml(k.id)}</th>`).join('')}
+    <th class="tl-th">Innbydelse</th>
+  </tr></thead>`
+  const tbody = `<tbody>${sorterData(filtrert).map(tabellRadHtml).join('')}</tbody>`
+  return `<table class="tl-tabell">${thead}${tbody}</table>`
+}
+
+function byggVisning(filtrert) {
+  return window.innerWidth > 600 ? tabellHtml(filtrert) : byggListe(filtrert)
+}
+
+// ── Kort (mobil) ──────────────────────────────────────────────────────────────
+
 function kortHtml(s) {
   const dato = formaterDato(s.dato)
   const sted = s.sted ? `<p class="tl-detalj">Sted: ${s.sted}</p>` : ''
@@ -203,7 +283,7 @@ export async function render(container) {
 
   function oppdaterListe() {
     const filtrert = filtrerData(allData)
-    container.querySelector('.tl-liste-container').innerHTML = byggListe(filtrert)
+    container.querySelector('.tl-liste-container').innerHTML = byggVisning(filtrert)
     const antall = container.querySelector('.tl-antall')
     if (antall) antall.textContent = `${filtrert.length} stevner`
     return filtrert
@@ -265,6 +345,28 @@ export async function render(container) {
   `
 
   oppdaterListe()
+
+  // Sortering ved klikk på kolonneheader (event-delegering på container)
+  const listeContainer = container.querySelector('.tl-liste-container')
+  listeContainer.addEventListener('click', e => {
+    const th = e.target.closest('[data-kolonne]')
+    if (!th) return
+    const kolonne = th.dataset.kolonne
+    if (sortering.kolonne === kolonne) {
+      sortering.retning = sortering.retning === 'asc' ? 'desc' : 'asc'
+    } else {
+      sortering.kolonne = kolonne
+      sortering.retning = 'asc'
+    }
+    oppdaterListe()
+  })
+
+  // Bytt mellom tabell/kort ved vindusendring
+  let resizeTimer
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(oppdaterListe, 200)
+  })
 
   getUser().then(auth => {
     if (!auth?.profil || (auth.profil.rolle !== 'admin' && auth.profil.rolle !== 'klubbadmin')) return
