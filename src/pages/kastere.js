@@ -4,7 +4,7 @@ import { getUser } from '../utils/auth.js'
 
 // ── Konstanter ────────────────────────────────────────────────────────────────
 
-const SIDER_STORLEIK = 15
+const SIDER_STORLEIK = 24
 const PLACEHOLDER_AVATAR = 'https://placehold.co/200x200/444/888?text=?'
 const FOERSTE_RING_AR = 2017
 
