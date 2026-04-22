@@ -1,16 +1,6 @@
-import { supabase } from '../supabase.js'
 import { getUser } from '../utils/auth.js'
-
-// ── Dato-formatering ──────────────────────────────────────────────────────────
-
-const datoFormat = new Intl.DateTimeFormat('nb-NO', {
-  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-})
-
-function formaterDato(datoStr) {
-  if (!datoStr) return ''
-  return datoFormat.format(new Date(datoStr))
-}
+import { hentStevner, hentFiltervalg, hentPameldte } from '../utils/stevne.js'
+import { formaterDatoLang as formaterDato, arOptions } from '../utils/shared.js'
 
 // ── Sortering ─────────────────────────────────────────────────────────────────
 
@@ -53,42 +43,6 @@ const filtre = {
 let allData = []
 let _auth = null
 let _pameldteIds = new Set()
-
-// ── Supabase-henting ──────────────────────────────────────────────────────────
-
-async function hentStevner() {
-  const { data, error } = await supabase
-    .from('stevne')
-    .select(`
-      id, navn, sted, dato, ernm, erfullfort, innbydelseurl, resultaturl,
-      klubb:klubbid(id, navn),
-      stevnetype:stevnetypeid(id, navn),
-      innledende:kastemetode!innledendekastemetodeid(id, navn),
-      avsluttende:kastemetode!avsluttendekastemetodeid(id, navn),
-      kategori:kategoriid(id, navn)
-    `)
-    .gte('dato', `${filtre.ar}-01-01`)
-    .lte('dato', `${filtre.ar}-12-31`)
-    .order('dato')
-
-  console.log('Terminliste Supabase svar:', { data, error })
-  return { data, error }
-}
-
-async function hentFiltervalg() {
-  const [stevnetyper, kastemetoder, klubber, kategorier] = await Promise.all([
-    supabase.from('stevnetype').select('id, navn').order('navn'),
-    supabase.from('kastemetode').select('id, navn').order('navn'),
-    supabase.from('klubb').select('id, navn').order('navn'),
-    supabase.from('kategori').select('id, navn').order('navn'),
-  ])
-  return {
-    stevnetyper: stevnetyper.data ?? [],
-    kastemetoder: kastemetoder.data ?? [],
-    klubber: klubber.data ?? [],
-    kategorier: kategorier.data ?? [],
-  }
-}
 
 // ── Klient-side filtrering ────────────────────────────────────────────────────
 
@@ -147,16 +101,6 @@ function lastNedExcel(filtrert) {
 }
 
 // ── HTML-bygging ──────────────────────────────────────────────────────────────
-
-function arOptions() {
-  const gjeldende = new Date().getFullYear()
-  const fra = 1983
-  let html = ''
-  for (let ar = gjeldende + 1; ar >= fra; ar--) {
-    html += `<option value="${ar}" ${ar === filtre.ar ? 'selected' : ''}>${ar}</option>`
-  }
-  return html
-}
 
 function dropdownOptions(liste, valgtId, tomLabel) {
   let html = `<option value="">${tomLabel}</option>`
@@ -266,13 +210,9 @@ function byggListe(filtrert) {
 export async function render(container) {
   container.innerHTML = `<p class="laster">Laster terminliste...</p>`
 
-  const [{ data, error }, filtervalg, auth] = await Promise.all([hentStevner(), hentFiltervalg(), getUser()])
+  const [{ data, error }, filtervalg, auth] = await Promise.all([hentStevner(filtre.ar), hentFiltervalg(), getUser()])
   _auth = auth
-  _pameldteIds = new Set()
-  if (auth?.user) {
-    const { data: pm } = await supabase.from('pamelding').select('stevneid').eq('bruker_id', auth.user.id)
-    _pameldteIds = new Set((pm ?? []).map(r => r.stevneid))
-  }
+  _pameldteIds = auth?.user ? await hentPameldte(auth.user.id) : new Set()
 
   if (error) {
     container.innerHTML = `<p class="feil">Kunne ikke laste terminliste.</p>`
@@ -295,7 +235,7 @@ export async function render(container) {
 
       <!-- Desktop-filterrad -->
       <div class="tl-filter-rad">
-        <select class="tl-select" id="tl-ar">${arOptions()}</select>
+        <select class="tl-select" id="tl-ar">${arOptions(filtre.ar, 1983, new Date().getFullYear() + 1)}</select>
         <input class="tl-input" id="tl-tekst" type="search" placeholder="Søk..." value="${filtre.tekst}">
         <select class="tl-select" id="tl-stevnetype">${dropdownOptions(filtervalg.stevnetyper, filtre.stevnetypeId, 'Alle typer')}</select>
         <select class="tl-select" id="tl-kastemetode">${dropdownOptions(filtervalg.kastemetoder, filtre.kastemetodeId, 'Alle metoder')}</select>
@@ -322,7 +262,7 @@ export async function render(container) {
       <div class="tl-bunnark-innhold">
         <h2 class="tl-bunnark-tittel">Filtre</h2>
         <label class="tl-label">År
-          <select class="tl-select" id="tl-ar-mobil">${arOptions()}</select>
+          <select class="tl-select" id="tl-ar-mobil">${arOptions(filtre.ar, 1983, new Date().getFullYear() + 1)}</select>
         </label>
         <label class="tl-label">Stevnetype
           <select class="tl-select" id="tl-stevnetype-mobil">${dropdownOptions(filtervalg.stevnetyper, filtre.stevnetypeId, 'Alle typer')}</select>
@@ -383,7 +323,7 @@ export async function render(container) {
     filtre.ar = Number(e.target.value)
     container.querySelector('.tl-tittel').textContent = `Terminliste ${filtre.ar}`
     container.querySelector('.tl-liste-container').innerHTML = '<p class="laster">Laster...</p>'
-    const { data: nyData, error: nyFeil } = await hentStevner()
+    const { data: nyData, error: nyFeil } = await hentStevner(filtre.ar)
     if (nyFeil) { container.querySelector('.tl-liste-container').innerHTML = '<p class="feil">Feil ved henting.</p>'; return }
     allData = nyData ?? []
     oppdaterListe()
@@ -455,7 +395,7 @@ export async function render(container) {
     if (arEndret) {
       container.querySelector('.tl-tittel').textContent = `Terminliste ${filtre.ar}`
       container.querySelector('.tl-liste-container').innerHTML = '<p class="laster">Laster...</p>'
-      const { data: nyData, error: nyFeil } = await hentStevner()
+      const { data: nyData, error: nyFeil } = await hentStevner(filtre.ar)
       if (nyFeil) { container.querySelector('.tl-liste-container').innerHTML = '<p class="feil">Feil ved henting.</p>'; return }
       allData = nyData ?? []
     }

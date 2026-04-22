@@ -1,4 +1,5 @@
 import { supabase } from '../supabase.js'
+import { formaterDato, arOptions } from '../utils/shared.js'
 
 const FOERSTE_AR = 2018
 const MIN_STEVNER = 5
@@ -17,13 +18,7 @@ let cache = {
 
 // ── Hjelpefunksjonar ──────────────────────────────────────────────────────────
 
-const datoFmt = new Intl.DateTimeFormat('nb-NO', { day: '2-digit', month: '2-digit', year: 'numeric' })
 const prosentFmt = new Intl.NumberFormat('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-
-function formaterDato(datoStr) {
-  if (!datoStr) return '–'
-  return datoFmt.format(new Date(datoStr))
-}
 
 function formaterProsent(p) {
   if (p == null) return '–'
@@ -164,15 +159,6 @@ function byggRankingListe(resultater, stevnerMap) {
 
 // ── HTML-byggjarar ────────────────────────────────────────────────────────────
 
-function arOptions(valgt) {
-  const gjeldende = new Date().getFullYear()
-  let html = ''
-  for (let ar = gjeldende; ar >= FOERSTE_AR; ar--) {
-    html += `<option value="${ar}"${ar === valgt ? ' selected' : ''}>${ar}</option>`
-  }
-  return html
-}
-
 function infoHtml(synleg) {
   return `
     <div id="nr-info-seksjon"${synleg ? '' : ' style="display:none"'}>
@@ -254,7 +240,7 @@ function sideSkelettHtml(ar) {
       ${infoHtml(false)}
       <hr>
       <div class="nc-filter-rad" style="margin-bottom:12px">
-        <select id="nr-ar" class="tl-select">${arOptions(ar)}</select>
+        <select id="nr-ar" class="tl-select">${arOptions(ar, FOERSTE_AR)}</select>
         <input id="nr-sok" type="text" class="tl-select" placeholder="Søk på navn/klubb..." value="">
       </div>
       <div style="text-align:right;margin-bottom:4px">

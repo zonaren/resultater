@@ -7,3 +7,6 @@
 ## Struktur
 - Legg delt logikk i `src/utils/` eller tilsvarande delt modul
 - Bruk arv/komposisjon/mixins framfor copy-paste av åtferd
+
+## GIT
+- Ikkje lag commit, push, pull osv med mindre eg ber om det spesifikt

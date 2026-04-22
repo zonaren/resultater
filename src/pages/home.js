@@ -1,14 +1,6 @@
 import { supabase } from '../supabase.js'
 import { formaterPoeng, hentRegler, hentStevnerOgResultater, byggSingelListe } from '../utils/norgescup.js'
-
-const datoFormat = new Intl.DateTimeFormat('nb-NO', {
-  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-})
-
-function formaterDato(datoStr) {
-  if (!datoStr) return ''
-  return datoFormat.format(new Date(datoStr))
-}
+import { formaterDatoLang as formaterDato } from '../utils/shared.js'
 
 function dagsdato() {
   return new Date().toISOString().slice(0, 10)

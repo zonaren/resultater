@@ -1,6 +1,7 @@
 import { supabase } from '../supabase.js'
 import { kasterNavn, lagKasterSlug as lagSlug } from '../utils/kaster.js'
 import { getUser } from '../utils/auth.js'
+import { formaterDato } from '../utils/shared.js'
 
 // ── Konstanter ────────────────────────────────────────────────────────────────
 
@@ -31,13 +32,7 @@ let aktivChart = null
 
 // ── Hjelpefunksjonar ──────────────────────────────────────────────────────────
 
-const datoFmt = new Intl.DateTimeFormat('nb-NO', { day: '2-digit', month: '2-digit', year: 'numeric' })
 const prosentFmt = new Intl.NumberFormat('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-
-function formaterDato(datoStr) {
-  if (!datoStr) return '–'
-  return datoFmt.format(new Date(datoStr))
-}
 
 function formaterProsent(p) {
   if (p == null) return '–'

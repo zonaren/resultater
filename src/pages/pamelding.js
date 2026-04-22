@@ -1,7 +1,6 @@
 import { supabase } from '../supabase.js'
 import { getUser } from '../utils/auth.js'
-
-const datoFmt = new Intl.DateTimeFormat('nb-NO', { day: '2-digit', month: '2-digit', year: 'numeric' })
+import { formaterDato } from '../utils/shared.js'
 
 export async function render(container, { id } = {}) {
   if (!id) { container.innerHTML = '<p class="feil" style="text-align:center;margin-top:40px;">Manglande stevne-ID.</p>'; return }
@@ -65,7 +64,7 @@ export async function render(container, { id } = {}) {
   if (stevne.klubbid && relaterteFraDato) { relaterte    = resultat[idx++]?.data ?? [] }
   if (erPrivilegert)                       { klubbKastere = resultat[idx]?.data   ?? [] }
 
-  const dato      = stevne.dato ? datoFmt.format(new Date(stevne.dato)) : ''
+  const dato      = stevne.dato ? formaterDato(stevne.dato) : ''
   const erKobla   = auth?.profil?.kobling_status === 'godkjent'
   const kasterid  = auth?.profil?.kasterid
   const erPameldt = pameldingar.some(p => p.kasterid === kasterid)
@@ -126,7 +125,7 @@ export async function render(container, { id } = {}) {
       <h5>Andre stevner same helg (same arrangør)</h5>
       <ul class="list-unstyled">
         ${relaterte.map(s => {
-          const d = s.dato ? datoFmt.format(new Date(s.dato)) : ''
+          const d = s.dato ? formaterDato(s.dato) : ''
           return `<li><a href="#/stevne/${s.id}/pamelding">${s.navn} — ${d}</a></li>`
         }).join('')}
       </ul>

@@ -6,6 +6,7 @@ import {
   byggSingelListe,
   byggLagListe,
 } from '../utils/norgescup.js'
+import { formaterDato, arOptions } from '../utils/shared.js'
 
 const FOERSTE_AR = 2007
 const FOERSTE_AR_MULTI_CUP = 2024
@@ -25,13 +26,6 @@ let cache = {
 }
 
 // ── Hjelpefunksjonar ──────────────────────────────────────────────────────────
-
-const datoFmt = new Intl.DateTimeFormat('nb-NO', { day: '2-digit', month: '2-digit', year: 'numeric' })
-
-function formaterDato(datoStr) {
-  if (!datoStr) return '–'
-  return datoFmt.format(new Date(datoStr))
-}
 
 // ── Data-henting ──────────────────────────────────────────────────────────────
 
@@ -53,15 +47,6 @@ async function hentOgBufferData(ar) {
 }
 
 // ── HTML-byggjarar ────────────────────────────────────────────────────────────
-
-function arOptions(valgt) {
-  const gjeldende = new Date().getFullYear()
-  let html = ''
-  for (let ar = gjeldende; ar >= FOERSTE_AR; ar--) {
-    html += `<option value="${ar}"${ar === valgt ? ' selected' : ''}>${ar}</option>`
-  }
-  return html
-}
 
 function beskrivelsesTekst(regler, cupType) {
   if (!regler) return ''
@@ -174,7 +159,7 @@ function sideSkelettHtml(ar, cupType) {
     <div class="nc-side">
       <h1 class="nc-hovudtittel">Norgescupen ${ar}</h1>
       <div class="nc-filter-rad">
-        <select id="nc-ar" class="tl-select">${arOptions(ar)}</select>
+        <select id="nc-ar" class="tl-select">${arOptions(ar, FOERSTE_AR)}</select>
         <select id="nc-cuptype" class="tl-select"${ar < FOERSTE_AR_MULTI_CUP ? ' style="display:none"' : ''}>
           <option value="NC"${cupType === 'NC' ? ' selected' : ''}>NC</option>
           <option value="SNC"${cupType === 'SNC' ? ' selected' : ''}>SNC</option>

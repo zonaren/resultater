@@ -1,14 +1,6 @@
 import { supabase } from '../supabase.js'
 import { getUser } from '../utils/auth.js'
-
-const datoFormat = new Intl.DateTimeFormat('nb-NO', {
-  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-})
-
-function formaterDato(datoStr) {
-  if (!datoStr) return ''
-  return datoFormat.format(new Date(datoStr))
-}
+import { formaterDatoLang as formaterDato } from '../utils/shared.js'
 
 async function hentStevne(id) {
   const { data, error } = await supabase
