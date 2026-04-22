@@ -1,5 +1,5 @@
 import { supabase } from '../supabase.js'
-import { formaterDato, arOptions } from '../utils/shared.js'
+import { formaterDato, arOptions, lastNedExcel as lastNedExcelFil } from '../utils/shared.js'
 
 const FOERSTE_AR = 2018
 const MIN_STEVNER = 5
@@ -157,6 +157,21 @@ function byggRankingListe(resultater, stevnerMap) {
   return [...gyldig, ...ugyldig]
 }
 
+// ── Excel-eksport ────────────────────────────────────────────────────────────
+
+function lastNedExcel() {
+  const stevnerMap = lagStevnerMap()
+  const liste = byggRankingListe(cache.resultater, stevnerMap)
+  const rader = liste.map(k => ({
+    'Plass': k.erGyldig ? k.plassering : '–',
+    'Kaster': k.navn,
+    'Klubb': k.klubb,
+    'Snitt %': k.snittProsent,
+    'Antal stevner': k.antallStevner,
+  }))
+  lastNedExcelFil(rader, `norgesranking-${filtre.ar}.xlsx`, 'Norgesranking')
+}
+
 // ── HTML-byggjarar ────────────────────────────────────────────────────────────
 
 function infoHtml(synleg) {
@@ -242,6 +257,7 @@ function sideSkelettHtml(ar) {
       <div class="nc-filter-rad" style="margin-bottom:12px">
         <select id="nr-ar" class="tl-select">${arOptions(ar, FOERSTE_AR)}</select>
         <input id="nr-sok" type="text" class="tl-select" placeholder="Søk på navn/klubb..." value="">
+        <button class="tl-excel-knapp" id="nr-excel">⬇ Excel</button>
       </div>
       <div style="text-align:right;margin-bottom:4px">
         <span class="nc-klikk-hint">Klikk prosent for å vise detaljer</span>
@@ -306,6 +322,8 @@ export async function render(container) {
     filtre.sokeTekst = e.target.value
     oppdaterTabell()
   })
+
+  container.querySelector('#nr-excel').addEventListener('click', lastNedExcel)
 
   container.querySelector('#nr-info-knapp').addEventListener('click', () => {
     filtre.infoSynleg = !filtre.infoSynleg

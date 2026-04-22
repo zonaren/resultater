@@ -13,6 +13,16 @@ export function formaterDatoLang(datoStr) {
   return datoFmtLang.format(new Date(datoStr))
 }
 
+// ── Excel-eksport ─────────────────────────────────────────────────────────────
+
+export function lastNedExcel(rader, filnamn, arknamn = 'Data') {
+  if (!window.XLSX) { alert('SheetJS ikkje lasta'); return }
+  const ark = XLSX.utils.json_to_sheet(rader)
+  const bok = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(bok, ark, arknamn)
+  XLSX.writeFile(bok, filnamn)
+}
+
 // ── År-dropdown ───────────────────────────────────────────────────────────────
 
 export function arOptions(valgt, fra, til = new Date().getFullYear()) {

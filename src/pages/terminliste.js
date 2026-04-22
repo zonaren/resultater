@@ -1,6 +1,6 @@
 import { getUser } from '../utils/auth.js'
 import { hentStevner, hentFiltervalg, hentPameldte } from '../utils/stevne.js'
-import { formaterDatoLang as formaterDato, arOptions } from '../utils/shared.js'
+import { formaterDatoLang as formaterDato, arOptions, lastNedExcel as lastNedExcelFil } from '../utils/shared.js'
 
 // ── Sortering ─────────────────────────────────────────────────────────────────
 
@@ -79,8 +79,6 @@ function filtrerData(data) {
 // ── Excel-eksport ─────────────────────────────────────────────────────────────
 
 function lastNedExcel(filtrert) {
-  if (!window.XLSX) { alert('SheetJS ikke lastet'); return }
-
   const rader = filtrert.map(s => ({
     'Dato': s.dato ? new Date(s.dato).toLocaleDateString('nb-NO') : '',
     'Navn': s.navn ?? '',
@@ -93,11 +91,7 @@ function lastNedExcel(filtrert) {
     'NM': s.ernm ? 'Ja' : 'Nei',
     'InnbydelseUrl': s.innbydelseurl ?? '',
   }))
-
-  const ark = XLSX.utils.json_to_sheet(rader)
-  const bok = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(bok, ark, 'Terminliste')
-  XLSX.writeFile(bok, `terminliste-${filtre.ar}.xlsx`)
+  lastNedExcelFil(rader, `terminliste-${filtre.ar}.xlsx`, 'Terminliste')
 }
 
 // ── HTML-bygging ──────────────────────────────────────────────────────────────
