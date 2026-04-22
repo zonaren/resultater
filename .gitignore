@@ -23,3 +23,7 @@ Thumbs.db
 # Logg
 *.log
 npm-debug.log*
+
+# Supabase
+supabase/.temp/
+supabase/seed.sql

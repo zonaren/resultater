@@ -1,0 +1,15 @@
+{
+  "name": "resultater-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zonaren/resultater.git"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "supabase": "^2.93.0"
+  }
+}
