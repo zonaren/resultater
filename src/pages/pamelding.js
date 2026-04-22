@@ -9,11 +9,10 @@ export async function render(container, { id } = {}) {
   container.innerHTML = '<p class="laster" style="text-align:center;margin-top:40px;">Laster…</p>'
 
   const auth = await getUser()
-  const erAdminRolle    = auth?.profil?.rolle === 'admin'
+  const erAdminRolle      = auth?.profil?.rolle === 'admin'
   const erKlubbadminRolle = auth?.profil?.rolle === 'klubbadmin'
-  const erPrivilegert   = erAdminRolle || erKlubbadminRolle
+  const erPrivilegert     = erAdminRolle || erKlubbadminRolle
 
-  // Hent stevne først for å bruke dato og klubbid i relaterte-spørring
   const { data: stevne } = await supabase
     .from('stevne')
     .select('id, navn, dato, sted, erfullfort, klubbid')
@@ -25,21 +24,16 @@ export async function render(container, { id } = {}) {
     return
   }
 
-  // Bygg datogrenser for relaterte stevner (+/- 2 dagar)
   const relaterteFraDato = stevne.dato ? new Date(new Date(stevne.dato).getTime() - 2 * 864e5) : null
   const relaterteTimDato = stevne.dato ? new Date(new Date(stevne.dato).getTime() + 2 * 864e5) : null
 
-  // Hent alt parallelt
   const hentingar = [
     supabase.from('pamelding')
-      .select('id, status, kasterid, kaster:kasterid(id, fornavn, etternavn, klubb:klubbid(navn))')
+      .select('id, kasterid, kaster:kasterid(id, fornavn, etternavn, klubb:klubbid(navn))')
       .eq('stevneid', id)
       .order('id'),
-    supabase.from('klasse').select('id, navn').order('navn'),
-    supabase.from('gruppe').select('id, navn').order('navn'),
   ]
 
-  // Relaterte stevner
   if (stevne.klubbid && relaterteFraDato) {
     hentingar.push(
       supabase.from('stevne')
@@ -53,7 +47,6 @@ export async function render(container, { id } = {}) {
     )
   }
 
-  // Klubbmedlemmar for admin/klubbadmin
   if (erPrivilegert) {
     if (erAdminRolle) {
       hentingar.push(supabase.from('kaster').select('id, fornavn, etternavn, klubb:klubbid(navn)').eq('eraktiv', true).order('etternavn'))
@@ -64,15 +57,13 @@ export async function render(container, { id } = {}) {
 
   const resultat = await Promise.all(hentingar)
 
-  const pameldingar   = resultat[0].data ?? []
-  const klassar       = resultat[1].data ?? []
-  const grupper       = resultat[2].data ?? []
-  let relaterte       = []
-  let klubbKastere    = []
+  const pameldingar = resultat[0].data ?? []
+  let relaterte     = []
+  let klubbKastere  = []
 
-  let idx = 3
+  let idx = 1
   if (stevne.klubbid && relaterteFraDato) { relaterte    = resultat[idx++]?.data ?? [] }
-  if (erPrivilegert)                       { klubbKastere = resultat[idx]?.data ?? []  }
+  if (erPrivilegert)                       { klubbKastere = resultat[idx]?.data   ?? [] }
 
   const dato      = stevne.dato ? datoFmt.format(new Date(stevne.dato)) : ''
   const erKobla   = auth?.profil?.kobling_status === 'godkjent'
@@ -80,9 +71,6 @@ export async function render(container, { id } = {}) {
   const erPameldt = pameldingar.some(p => p.kasterid === kasterid)
 
   // ── Eige påmeldingsskjema ────────────────────────────────────────────────────
-  const klasseOpt = klassar.map(k => `<option value="${k.id}">${k.navn}</option>`).join('')
-  const gruppeOpt = grupper.map(g => `<option value="${g.id}">${g.navn}</option>`).join('')
-
   let skjemaHtml = ''
   if (!auth) {
     skjemaHtml = `<div class="alert alert-info">
@@ -95,32 +83,15 @@ export async function render(container, { id } = {}) {
   } else if (stevne.erfullfort) {
     skjemaHtml = `<div class="alert alert-secondary">Dette stevnet er fullført. Påmelding er stengt.</div>`
   } else if (erKobla && erPameldt) {
-    const min = pameldingar.find(p => p.kasterid === kasterid)
     skjemaHtml = `
       <div class="alert alert-success d-flex justify-content-between align-items-center">
-        <span>Du er påmeldt (status: <strong>${min?.status}</strong>)</span>
+        <span>Du er påmeldt</span>
         <button id="avmeld-knapp" class="btn btn-sm btn-outline-danger">Meld av</button>
       </div>`
   } else if (erKobla && !stevne.erfullfort) {
     skjemaHtml = `
       <form id="pamelding-skjema" class="card p-3 mb-3">
         <h5 class="mb-3">Meld deg på</h5>
-        <div class="mb-3">
-          <label class="form-label">Klasse</label>
-          <select class="form-select" name="klasse_id">
-            <option value="">— vel (valfritt) —</option>${klasseOpt}
-          </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Gruppe</label>
-          <select class="form-select" name="gruppe_id">
-            <option value="">— vel (valfritt) —</option>${gruppeOpt}
-          </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Merknad</label>
-          <input type="text" class="form-control" name="merknad" placeholder="Valfri merknad">
-        </div>
         <div id="pm-feil" class="alert alert-danger d-none"></div>
         <button type="submit" class="btn btn-primary">Meld på</button>
       </form>`
@@ -129,9 +100,9 @@ export async function render(container, { id } = {}) {
   // ── Admin/klubbadmin: meld på andre ─────────────────────────────────────────
   let adminSkjemaHtml = ''
   if (erPrivilegert && !stevne.erfullfort) {
-    const allereie = new Set(pameldingar.map(p => p.kasterid))
+    const allereie     = new Set(pameldingar.map(p => p.kasterid))
     const tilgjengelige = klubbKastere.filter(k => !allereie.has(k.id))
-    const kasterOpt = tilgjengelige.map(k =>
+    const kasterOpt    = tilgjengelige.map(k =>
       `<option value="${k.id}">${k.etternavn}, ${k.fornavn} — ${k.klubb?.navn ?? ''}</option>`
     ).join('')
 
@@ -143,22 +114,6 @@ export async function render(container, { id } = {}) {
           <select class="form-select" name="admin_kasterid" required>
             <option value="">— vel utøvar —</option>${kasterOpt}
           </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Klasse</label>
-          <select class="form-select" name="klasse_id">
-            <option value="">— vel (valfritt) —</option>${klasseOpt}
-          </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Gruppe</label>
-          <select class="form-select" name="gruppe_id">
-            <option value="">— vel (valfritt) —</option>${gruppeOpt}
-          </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Merknad</label>
-          <input type="text" class="form-control" name="merknad" placeholder="Valfri merknad">
         </div>
         <div id="admin-pm-feil" class="alert alert-danger d-none"></div>
         <button type="submit" class="btn btn-warning">Meld på</button>
@@ -180,12 +135,11 @@ export async function render(container, { id } = {}) {
   // ── Påmeldingsliste ──────────────────────────────────────────────────────────
   const listHtml = pameldingar.length
     ? `<table class="table table-sm">
-        <thead><tr><th>Namn</th><th>Klubb</th><th>Status</th>${erPrivilegert ? '<th></th>' : ''}</tr></thead>
+        <thead><tr><th>Namn</th><th>Klubb</th>${erPrivilegert ? '<th></th>' : ''}</tr></thead>
         <tbody>
           ${pameldingar.map(p => `<tr>
             <td>${p.kaster ? `<a href="#/kastere/${p.kaster.id}">${p.kaster.fornavn} ${p.kaster.etternavn}</a>` : '—'}</td>
             <td>${p.kaster?.klubb?.navn ?? ''}</td>
-            <td><span class="badge bg-${p.status === 'bekreftet' ? 'success' : p.status === 'avmeldt' ? 'secondary' : 'primary'}">${p.status}</span></td>
             ${erPrivilegert ? `<td><button class="btn btn-sm btn-outline-danger fjern-pm" data-id="${p.id}">Fjern</button></td>` : ''}
           </tr>`).join('')}
         </tbody>
@@ -203,29 +157,23 @@ export async function render(container, { id } = {}) {
       ${listHtml}
     </div>`
 
-  // Eige påmeldingsskjema
   container.querySelector('#pamelding-skjema')?.addEventListener('submit', async e => {
     e.preventDefault()
-    const fd   = new FormData(e.target)
     const feil = container.querySelector('#pm-feil')
     feil.classList.add('d-none')
     const { error } = await supabase.from('pamelding').insert({
       stevneid:  Number(id),
       kasterid,
       bruker_id: auth.user.id,
-      klasse_id: fd.get('klasse_id') ? Number(fd.get('klasse_id')) : null,
-      gruppe_id: fd.get('gruppe_id') ? Number(fd.get('gruppe_id')) : null,
-      merknad:   fd.get('merknad').trim() || null,
     })
     if (error) { feil.textContent = error.message; feil.classList.remove('d-none'); return }
     render(container, { id })
   })
 
-  // Admin: meld på andre
   container.querySelector('#admin-pamelding-skjema')?.addEventListener('submit', async e => {
     e.preventDefault()
-    const fd   = new FormData(e.target)
-    const feil = container.querySelector('#admin-pm-feil')
+    const fd            = new FormData(e.target)
+    const feil          = container.querySelector('#admin-pm-feil')
     feil.classList.add('d-none')
     const velgtKasterid = Number(fd.get('admin_kasterid'))
     if (!velgtKasterid) { feil.textContent = 'Vel ein utøvar.'; feil.classList.remove('d-none'); return }
@@ -233,15 +181,11 @@ export async function render(container, { id } = {}) {
       stevneid:  Number(id),
       kasterid:  velgtKasterid,
       bruker_id: auth.user.id,
-      klasse_id: fd.get('klasse_id') ? Number(fd.get('klasse_id')) : null,
-      gruppe_id: fd.get('gruppe_id') ? Number(fd.get('gruppe_id')) : null,
-      merknad:   fd.get('merknad').trim() || null,
     })
     if (error) { feil.textContent = error.message; feil.classList.remove('d-none'); return }
     render(container, { id })
   })
 
-  // Avmelding
   container.querySelector('#avmeld-knapp')?.addEventListener('click', async () => {
     const min = pameldingar.find(p => p.kasterid === kasterid)
     if (!min || !confirm('Vil du melde deg av?')) return
@@ -249,7 +193,6 @@ export async function render(container, { id } = {}) {
     render(container, { id })
   })
 
-  // Admin: fjern påmelding
   container.querySelectorAll('.fjern-pm').forEach(knapp => {
     knapp.addEventListener('click', async () => {
       if (!confirm('Fjern påmelding?')) return

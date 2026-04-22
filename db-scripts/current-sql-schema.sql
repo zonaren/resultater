@@ -108,17 +108,11 @@ CREATE TABLE public.pamelding (
   stevneid integer NOT NULL,
   kasterid integer NOT NULL,
   bruker_id uuid NOT NULL,
-  klasse_id integer,
-  gruppe_id integer,
-  merknad text,
-  status text NOT NULL DEFAULT 'pameldt'::text CHECK (status = ANY (ARRAY['pameldt'::text, 'avmeldt'::text, 'bekreftet'::text])),
   opprettet_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT pamelding_pkey PRIMARY KEY (id),
   CONSTRAINT pamelding_stevneid_fkey FOREIGN KEY (stevneid) REFERENCES public.stevne(id),
   CONSTRAINT pamelding_kasterid_fkey FOREIGN KEY (kasterid) REFERENCES public.kaster(id),
-  CONSTRAINT pamelding_bruker_id_fkey FOREIGN KEY (bruker_id) REFERENCES auth.users(id),
-  CONSTRAINT pamelding_klasse_id_fkey FOREIGN KEY (klasse_id) REFERENCES public.klasse(id),
-  CONSTRAINT pamelding_gruppe_id_fkey FOREIGN KEY (gruppe_id) REFERENCES public.gruppe(id)
+  CONSTRAINT pamelding_bruker_id_fkey FOREIGN KEY (bruker_id) REFERENCES auth.users(id)
 );
 CREATE TABLE public.resultat (
   id integer NOT NULL DEFAULT nextval('resultat_id_seq'::regclass),
