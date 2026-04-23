@@ -26,9 +26,20 @@
   z-index: 100;
 }
 
+.header-tittel-gruppe {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
 .header-tittel {
   font-size: 0.95rem;
   font-weight: bold;
+}
+
+.header-versjon {
+  font-size: 0.65rem;
+  color: #888;
 }
 
 .meny-knapp {
